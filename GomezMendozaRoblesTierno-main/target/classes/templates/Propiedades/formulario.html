@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Propiedad</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        form { max-width: 500px; }
+        label { display: block; margin-top: 12px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
+        .btn { padding: 10px 20px; margin-top: 20px; border: none; cursor: pointer; border-radius: 4px; color: white; }
+        .btn-guardar { background-color: #27ae60; }
+        .error { color: #e74c3c; font-weight: bold; padding: 10px; border: 1px solid #e74c3c; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <h1 th:if="${propiedad.id == null}">Nueva Propiedad</h1>
+    <h1 th:if="${propiedad.id != null}">Editar Propiedad</h1>
+
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/propiedades/guardar}" th:object="${propiedad}" method="post">
+
+        <!-- Campo oculto con el id (vacio si es alta, con valor si es edicion) -->
+        <input type="hidden" th:field="*{id}" />
+
+        <label>Direccion</label>
+        <input type="text" th:field="*{direccion}" required />
+
+        <label>Ciudad</label>
+        <select th:field="*{ciudad}" required>
+            <option value="">-- Seleccione --</option>
+            <option th:each="c : ${ciudades}" th:value="${c.id}" th:text="${c.nombre}"></option>
+        </select>
+
+        <label>Tipo de Propiedad</label>
+        <select th:field="*{tipo}" required>
+            <option value="">-- Seleccione --</option>
+            <option th:each="t : ${T(ar.edu.utn.desi.hogarya.model.TipoPropiedad).values()}"
+                    th:value="${t}" th:text="${t}"></option>
+        </select>
+
+        <label>Cantidad de Ambientes</label>
+        <input type="number" min="1" th:field="*{cantidadAmbientes}" required />
+
+        <label>Metros Cuadrados</label>
+        <input type="number" min="1" step="0.01" th:field="*{metrosCuadrados}" required />
+
+        <label>Descripcion</label>
+        <textarea th:field="*{descripcion}" required></textarea>
+
+        <label>Estado de Disponibilidad</label>
+        <select th:field="*{estadoDisponibilidad}" required>
+            <option th:each="e : ${T(ar.edu.utn.desi.hogarya.model.EstadoDisponibilidad).values()}"
+                    th:value="${e}" th:text="${e}"></option>
+        </select>
+
+        <label>Propietario</label>
+        <select th:field="*{propietario}" required>
+            <option value="">-- Seleccione --</option>
+            <option th:each="p : ${propietarios}" th:value="${p.id}" th:text="${p.nombreCompleto}"></option>
+        </select>
+
+        <button type="submit" class="btn btn-guardar">Guardar</button>
+
+    </form>
+
+</body>
+</html>
