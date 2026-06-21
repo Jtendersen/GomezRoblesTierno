@@ -1,18 +1,25 @@
-<!doctype html>
-<html lang="es">
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
   <head>
     <meta charset="UTF-8" />
     <title>HogarYA</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 40px; }
+      ul { list-style: none; padding: 0; }
+      li { margin: 10px 0; }
+      a { color: #2c3e50; font-size: 1.1em; text-decoration: none; }
+      a:hover { text-decoration: underline; }
+    </style>
   </head>
   <body>
     <h1>HogarYA</h1>
     <p>Sistema de gestión inmobiliaria - TP Integrador DESI</p>
 
     <ul>
-      <li>Propiedades</li>
-      <li>Publicaciones</li>
-      <li>Contratos</li>
-      <li>Facturas</li>
+      <li><a th:href="@{/propiedades}">Propiedades</a></li>
+      <li><a th:href="@{/publicaciones}">Publicaciones</a></li>
+      <li><a th:href="@{/contratos}">Contratos</a></li>
+      <li><a th:href="@{/facturas}">Facturas</a></li>
     </ul>
   </body>
 </html>
