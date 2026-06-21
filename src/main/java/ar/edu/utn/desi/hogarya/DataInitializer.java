@@ -3,10 +3,13 @@ package ar.edu.utn.desi.hogarya;
 import ar.edu.utn.desi.hogarya.model.*;
 import ar.edu.utn.desi.hogarya.repository.CiudadRepository;
 import ar.edu.utn.desi.hogarya.repository.PersonaRepository;
+import ar.edu.utn.desi.hogarya.service.ContratoService;
 import ar.edu.utn.desi.hogarya.service.PropiedadService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Component
@@ -15,19 +18,23 @@ public class DataInitializer implements CommandLineRunner {
     private final CiudadRepository ciudadRepository;
     private final PersonaRepository personaRepository;
     private final PropiedadService propiedadService;
+    private final ContratoService contratoService;
 
     public DataInitializer(CiudadRepository ciudadRepository,
                            PersonaRepository personaRepository,
-                           PropiedadService propiedadService) {
+                           PropiedadService propiedadService,
+                           ContratoService contratoService) {
         this.ciudadRepository = ciudadRepository;
         this.personaRepository = personaRepository;
         this.propiedadService = propiedadService;
+        this.contratoService = contratoService;
     }
 
     @Override
     public void run(String... args) {
         if (ciudadRepository.count() > 0) return;
 
+        // --- Ciudades ---
         List<Ciudad> ciudades = ciudadRepository.saveAll(List.of(
                 new Ciudad("Santa Fe"),
                 new Ciudad("Rosario"),
@@ -35,11 +42,11 @@ public class DataInitializer implements CommandLineRunner {
                 new Ciudad("Buenos Aires")
         ));
 
-        Ciudad santaFe  = ciudades.get(0);
-        Ciudad rosario  = ciudades.get(1);
-        Ciudad cordoba  = ciudades.get(2);
-        Ciudad bsAs     = ciudades.get(3);
+        Ciudad santaFe = ciudades.get(0);
+        Ciudad rosario = ciudades.get(1);
+        Ciudad cordoba = ciudades.get(2);
 
+        // --- Personas ---
         List<Persona> personas = personaRepository.saveAll(List.of(
                 new Persona("Carlos Pérez",     "20-11111111-1", "342-4001111", "cperez@mail.com",    "Av. San Martín 100, Santa Fe"),
                 new Persona("Ana García",        "27-22222222-2", "341-4002222", "agarcia@mail.com",   "Bv. Oroño 200, Rosario"),
@@ -48,12 +55,13 @@ public class DataInitializer implements CommandLineRunner {
                 new Persona("Roberto Fernández", "20-55555555-5", "342-4005555", "rfernandez@mail.com","San Jerónimo 500, Santa Fe")
         ));
 
-        Persona carlos   = personas.get(0);
-        Persona ana      = personas.get(1);
-        Persona luis     = personas.get(2);
-        Persona roberto  = personas.get(4);
+        Persona carlos  = personas.get(0);
+        Persona ana     = personas.get(1);
+        Persona luis    = personas.get(2);
+        Persona maria   = personas.get(3);
+        Persona roberto = personas.get(4);
 
-        // Propiedades DISPONIBLES — necesarias para crear Publicaciones y Contratos
+        // --- Propiedades ---
         Propiedad p1 = new Propiedad();
         p1.setDireccion("Rivadavia 1234");
         p1.setCiudad(santaFe);
@@ -97,5 +105,43 @@ public class DataInitializer implements CommandLineRunner {
         p4.setEstadoDisponibilidad(EstadoDisponibilidad.DISPONIBLE);
         p4.setPropietario(roberto);
         propiedadService.crear(p4);
+
+        // --- Contratos ---
+
+        // Contrato 1: BORRADOR — p1 permanece DISPONIBLE
+        Contrato c1 = new Contrato();
+        c1.setPropiedad(p1);
+        c1.setInquilino(maria);
+        c1.setFechaInicio(LocalDate.of(2026, 7, 1));
+        c1.setDuracionMeses(12);
+        c1.setImporteMensual(new BigDecimal("85000.00"));
+        c1.setDiaVencimientoMensual(10);
+        c1.setDescripcion("Contrato en borrador, pendiente de firma.");
+        contratoService.crear(c1);
+
+        // Contrato 2: ACTIVO — p2 pasa a ALQUILADA
+        Contrato c2 = new Contrato();
+        c2.setPropiedad(p2);
+        c2.setInquilino(roberto);
+        c2.setFechaInicio(LocalDate.of(2025, 6, 1));
+        c2.setDuracionMeses(24);
+        c2.setImporteMensual(new BigDecimal("120000.00"));
+        c2.setDiaVencimientoMensual(5);
+        c2.setDescripcion("Contrato vigente de alquiler de casa.");
+        Contrato c2Guardado = contratoService.crear(c2);
+        contratoService.cambiarEstado(c2Guardado.getId(), EstadoContrato.ACTIVO);
+
+        // Contrato 3: FINALIZADO — p3 vuelve a DISPONIBLE
+        Contrato c3 = new Contrato();
+        c3.setPropiedad(p3);
+        c3.setInquilino(maria);
+        c3.setFechaInicio(LocalDate.of(2024, 1, 1));
+        c3.setDuracionMeses(12);
+        c3.setImporteMensual(new BigDecimal("95000.00"));
+        c3.setDiaVencimientoMensual(15);
+        c3.setDescripcion("Contrato de local comercial, ya finalizado.");
+        Contrato c3Guardado = contratoService.crear(c3);
+        contratoService.cambiarEstado(c3Guardado.getId(), EstadoContrato.ACTIVO);
+        contratoService.cambiarEstado(c3Guardado.getId(), EstadoContrato.FINALIZADO);
     }
 }

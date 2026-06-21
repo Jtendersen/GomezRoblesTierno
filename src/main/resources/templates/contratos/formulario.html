@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Formulario de Contrato</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 30px; }
+        form { max-width: 520px; }
+        label { display: block; margin-top: 12px; font-weight: bold; }
+        input, select, textarea { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
+        .btn { padding: 10px 20px; margin-top: 20px; border: none; cursor: pointer; border-radius: 4px; color: white; }
+        .btn-guardar { background-color: #27ae60; }
+        .btn-cancelar { background-color: #95a5a6; text-decoration: none; display: inline-block; padding: 10px 20px; margin-top: 20px; border-radius: 4px; }
+        .error { color: #e74c3c; font-weight: bold; padding: 10px; border: 1px solid #e74c3c; margin-bottom: 15px; }
+        .info { color: #7f8c8d; font-size: 12px; margin-top: 3px; }
+    </style>
+</head>
+<body>
+
+    <h1 th:if="${contrato.id == null}">Nuevo Contrato</h1>
+    <h1 th:if="${contrato.id != null}">Editar Contrato</h1>
+
+    <div class="error" th:if="${error}" th:text="${error}"></div>
+
+    <form th:action="@{/contratos/guardar}" th:object="${contrato}" method="post">
+
+        <input type="hidden" th:field="*{id}" />
+
+        <label>Propiedad</label>
+        <select th:field="*{propiedad}" required>
+            <option value="">-- Seleccione una propiedad --</option>
+            <option th:each="p : ${propiedades}"
+                    th:value="${p.id}"
+                    th:text="${p.direccion + ' - ' + p.ciudad.nombre + ' (' + p.estadoDisponibilidad + ')'}">
+            </option>
+        </select>
+        <p class="info">El propietario se asigna automáticamente según la propiedad seleccionada.</p>
+
+        <label>Inquilino</label>
+        <select th:field="*{inquilino}" required>
+            <option value="">-- Seleccione un inquilino --</option>
+            <option th:each="i : ${inquilinos}"
+                    th:value="${i.id}"
+                    th:text="${i.nombreCompleto + ' — ' + i.dniCuit}">
+            </option>
+        </select>
+
+        <label>Fecha de Inicio</label>
+        <input type="date" th:field="*{fechaInicio}" required />
+
+        <label>Duración (meses)</label>
+        <input type="number" min="1" th:field="*{duracionMeses}" required />
+
+        <label>Importe Mensual ($)</label>
+        <input type="number" min="0.01" step="0.01" th:field="*{importeMensual}" required />
+
+        <label>Día de Vencimiento Mensual (1-31)</label>
+        <input type="number" min="1" max="31" th:field="*{diaVencimientoMensual}" required />
+
+        <label>Descripción</label>
+        <textarea th:field="*{descripcion}" rows="3"></textarea>
+
+        <br>
+        <button type="submit" class="btn btn-guardar">Guardar</button>
+        <a class="btn-cancelar" th:href="@{/contratos}">Cancelar</a>
+
+    </form>
+
+</body>
+</html>
