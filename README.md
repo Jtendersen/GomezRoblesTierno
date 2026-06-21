@@ -26,8 +26,8 @@ TP Integrador — DESI 2026 — UTN FRSF.
 ### 1. Clonar el repo
 
 ```bash
-git clone https://github.com/Jtendersen/GomezMendozaRoblesTierno.git
-cd GomezMendozaRoblesTierno
+git clone https://github.com/Jtendersen/GomezRoblesTierno.git
+cd GomezRoblesTierno
 ```
 
 ### 2. Configurar la base de datos
@@ -39,7 +39,7 @@ spring.datasource.username=root
 spring.datasource.password=root
 ```
 
-Si tu MySQL tiene otra contraseña, cambiála ahí. La base de datos `GomezMendozaRoblesTierno` se crea sola la primera vez que levantás el proyecto.
+Si tu MySQL tiene otra contraseña, cambiála ahí. La base de datos `GomezRoblesTierno` se crea sola la primera vez que levantás el proyecto.
 
 ### 3. Correr la aplicación
 
