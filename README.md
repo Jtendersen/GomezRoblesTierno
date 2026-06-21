@@ -5,6 +5,14 @@ TP Integrador — DESI 2026 — UTN FRSF.
 
 ---
 
+## Integrantes
+
+- Gomez
+- Robles
+- Juan Manuel Tierno
+
+---
+
 ## Lo que necesitás tener instalado
 
 - Java 17
