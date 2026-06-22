@@ -20,6 +20,7 @@ public class Propiedad {
 
     @NotBlank
     private String direccion;
+    private String comodidades;
 
     @ManyToOne
     @NotNull
@@ -107,6 +108,14 @@ public class Propiedad {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+    
+    public String getComodidades() {
+        return comodidades;
+    }
+
+    public void setComodidades(String comodidades) {
+        this.comodidades = comodidades;
     }
 
     public EstadoDisponibilidad getEstadoDisponibilidad() {

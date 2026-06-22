@@ -19,9 +19,38 @@
 
     <h1>Propiedades</h1>
 
-    <a class="btn btn-nuevo" th:href="@{/propiedades/nueva}">+ Nueva Propiedad</a>
+	<a class="btn btn-nuevo" th:href="@{/propiedades/nueva}">+ Nueva Propiedad</a>
 
-    <br><br>
+	<br><br>
+
+	<form th:action="@{/propiedades}" method="get" style="margin-bottom: 20px;">
+	    <label>Direccion:</label>
+	    <input type="text" name="direccion" th:value="${filtroDireccion}" />
+
+	    <label>Ciudad:</label>
+	    <select name="ciudadId">
+	        <option value="">-- Todas --</option>
+	        <option th:each="c : ${ciudades}" th:value="${c.id}" th:text="${c.nombre}"
+	                th:selected="${c.id == filtroCiudadId}"></option>
+	    </select>
+
+	    <label>Tipo:</label>
+	    <select name="tipo">
+	        <option value="">-- Todos --</option>
+	        <option th:each="t : ${tipos}" th:value="${t}" th:text="${t}"
+	                th:selected="${t == filtroTipo}"></option>
+	    </select>
+
+	    <label>Estado:</label>
+	    <select name="estado">
+	        <option value="">-- Todos --</option>
+	        <option th:each="e : ${estados}" th:value="${e}" th:text="${e}"
+	                th:selected="${e == filtroEstado}"></option>
+	    </select>
+
+	    <button type="submit" class="btn btn-nuevo" style="margin-left: 10px;">Buscar</button>
+	    <a th:href="@{/propiedades}" class="btn btn-editar">Limpiar filtros</a>
+	</form>
 
     <table>
         <thead>

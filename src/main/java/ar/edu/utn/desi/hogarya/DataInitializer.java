@@ -3,6 +3,7 @@ package ar.edu.utn.desi.hogarya;
 import ar.edu.utn.desi.hogarya.model.*;
 import ar.edu.utn.desi.hogarya.repository.CiudadRepository;
 import ar.edu.utn.desi.hogarya.repository.PersonaRepository;
+import ar.edu.utn.desi.hogarya.repository.ProvinciaRepository;
 import ar.edu.utn.desi.hogarya.service.ContratoService;
 import ar.edu.utn.desi.hogarya.service.PropiedadService;
 import org.springframework.boot.CommandLineRunner;
@@ -16,15 +17,18 @@ import java.util.List;
 public class DataInitializer implements CommandLineRunner {
 
     private final CiudadRepository ciudadRepository;
+    private final ProvinciaRepository provinciaRepository;
     private final PersonaRepository personaRepository;
     private final PropiedadService propiedadService;
     private final ContratoService contratoService;
 
     public DataInitializer(CiudadRepository ciudadRepository,
+                           ProvinciaRepository provinciaRepository,
                            PersonaRepository personaRepository,
                            PropiedadService propiedadService,
                            ContratoService contratoService) {
         this.ciudadRepository = ciudadRepository;
+        this.provinciaRepository = provinciaRepository;
         this.personaRepository = personaRepository;
         this.propiedadService = propiedadService;
         this.contratoService = contratoService;
@@ -34,12 +38,17 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         if (ciudadRepository.count() > 0) return;
 
+        // --- Provincias ---
+        Provincia provSantaFe = provinciaRepository.save(new Provincia("Santa Fe"));
+        Provincia provCordoba = provinciaRepository.save(new Provincia("Córdoba"));
+        Provincia provBsAs = provinciaRepository.save(new Provincia("Buenos Aires"));
+
         // --- Ciudades ---
         List<Ciudad> ciudades = ciudadRepository.saveAll(List.of(
-                new Ciudad("Santa Fe"),
-                new Ciudad("Rosario"),
-                new Ciudad("Córdoba"),
-                new Ciudad("Buenos Aires")
+                new Ciudad("Santa Fe", provSantaFe),
+                new Ciudad("Rosario", provSantaFe),
+                new Ciudad("Córdoba", provCordoba),
+                new Ciudad("Buenos Aires", provBsAs)
         ));
 
         Ciudad santaFe = ciudades.get(0);

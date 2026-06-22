@@ -1,6 +1,7 @@
 package ar.edu.utn.desi.hogarya.service;
 
 import java.time.LocalDateTime;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,20 +10,30 @@ import org.springframework.stereotype.Service;
 import ar.edu.utn.desi.hogarya.model.EstadoDisponibilidad;
 import ar.edu.utn.desi.hogarya.model.HistorialEstadoPropiedad;
 import ar.edu.utn.desi.hogarya.model.Propiedad;
+import ar.edu.utn.desi.hogarya.model.TipoPropiedad;
 import ar.edu.utn.desi.hogarya.repository.HistorialEstadoPropiedadRepository;
+import ar.edu.utn.desi.hogarya.repository.ContratoRepository;
+import ar.edu.utn.desi.hogarya.model.EstadoContrato;
 import ar.edu.utn.desi.hogarya.repository.PropiedadRepository;
 
 @Service
 public class PropiedadService {
 
-    @Autowired
-    private PropiedadRepository propiedadRepository;
+	@Autowired
+	private PropiedadRepository propiedadRepository;
 
-    @Autowired
-    private HistorialEstadoPropiedadRepository historialRepository;
+	@Autowired
+	private HistorialEstadoPropiedadRepository historialRepository;
+
+	@Autowired
+	private ContratoRepository contratoRepository;
 
     public List<Propiedad> listarActivas() {
         return propiedadRepository.findByEliminadaFalse();
+    }
+    
+    public List<Propiedad> buscarConFiltros(String direccion, Long ciudadId, TipoPropiedad tipo, EstadoDisponibilidad estado) {
+        return propiedadRepository.buscarConFiltros(direccion, ciudadId, tipo, estado);
     }
 
     public Propiedad buscarPorId(Long id) {
@@ -63,6 +74,23 @@ public class PropiedadService {
 
         boolean cambioEstado = existente.getEstadoDisponibilidad() != datosNuevos.getEstadoDisponibilidad();
 
+     // Regla: no se puede pasar a DISPONIBLE o INACTIVA si la propiedad tiene un contrato ACTIVO
+     if (cambioEstado &&
+             (datosNuevos.getEstadoDisponibilidad() == EstadoDisponibilidad.DISPONIBLE
+                     || datosNuevos.getEstadoDisponibilidad() == EstadoDisponibilidad.INACTIVA)) {
+
+         boolean tieneContratoActivo = contratoRepository.existsByPropiedad_IdAndEstado(
+                 existente.getId(), EstadoContrato.ACTIVO);
+
+         if (tieneContratoActivo) {
+             throw new IllegalStateException(
+                     "No se puede cambiar el estado de la propiedad: tiene un contrato activo vigente. " +
+                     "Debe finalizar o rescindir el contrato primero.");
+         }
+     }
+
+     existente.setDireccion(datosNuevos.getDireccion());
+     
         existente.setDireccion(datosNuevos.getDireccion());
         existente.setCiudad(datosNuevos.getCiudad());
         existente.setTipo(datosNuevos.getTipo());
