@@ -6,9 +6,12 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import ar.edu.utn.desi.hogarya.model.EstadoContrato;
 import ar.edu.utn.desi.hogarya.model.EstadoDisponibilidad;
 import ar.edu.utn.desi.hogarya.model.HistorialEstadoPropiedad;
 import ar.edu.utn.desi.hogarya.model.Propiedad;
+import ar.edu.utn.desi.hogarya.model.TipoPropiedad;
+import ar.edu.utn.desi.hogarya.repository.ContratoRepository;
 import ar.edu.utn.desi.hogarya.repository.HistorialEstadoPropiedadRepository;
 import ar.edu.utn.desi.hogarya.repository.PropiedadRepository;
 
@@ -21,8 +24,15 @@ public class PropiedadService {
     @Autowired
     private HistorialEstadoPropiedadRepository historialRepository;
 
+    @Autowired
+    private ContratoRepository contratoRepository;
+
     public List<Propiedad> listarActivas() {
         return propiedadRepository.findByEliminadaFalse();
+    }
+
+    public List<Propiedad> buscarConFiltros(String direccion, Long ciudadId, TipoPropiedad tipo, EstadoDisponibilidad estado) {
+        return propiedadRepository.buscarConFiltros(direccion, ciudadId, tipo, estado);
     }
 
     public Propiedad buscarPorId(Long id) {
@@ -33,17 +43,22 @@ public class PropiedadService {
     public Propiedad crear(Propiedad propiedad) {
         boolean existe = propiedadRepository.existsByDireccionAndCiudad_IdAndEliminadaFalse(
                 propiedad.getDireccion(), propiedad.getCiudad().getId());
+
         if (existe) {
-            throw new IllegalArgumentException("Ya existe una propiedad activa con esa direccion y ciudad.");
+            throw new IllegalArgumentException(
+                    "Ya existe una propiedad activa con esa direccion y ciudad.");
         }
 
         if (propiedad.getEstadoDisponibilidad() == null) {
             propiedad.setEstadoDisponibilidad(EstadoDisponibilidad.DISPONIBLE);
         }
+
         propiedad.setEliminada(false);
 
         Propiedad guardada = propiedadRepository.save(propiedad);
+
         registrarHistorial(guardada);
+
         return guardada;
     }
 
@@ -57,11 +72,26 @@ public class PropiedadService {
             boolean existe = propiedadRepository.existsByDireccionAndCiudad_IdAndEliminadaFalse(
                     datosNuevos.getDireccion(), datosNuevos.getCiudad().getId());
             if (existe) {
-                throw new IllegalArgumentException("Ya existe otra propiedad activa con esa direccion y ciudad.");
+                throw new IllegalArgumentException(
+                        "Ya existe otra propiedad activa con esa direccion y ciudad.");
             }
         }
 
         boolean cambioEstado = existente.getEstadoDisponibilidad() != datosNuevos.getEstadoDisponibilidad();
+
+        if (cambioEstado &&
+                (datosNuevos.getEstadoDisponibilidad() == EstadoDisponibilidad.DISPONIBLE
+                        || datosNuevos.getEstadoDisponibilidad() == EstadoDisponibilidad.INACTIVA)) {
+
+            boolean tieneContratoActivo = contratoRepository.existsByPropiedad_IdAndEstado(
+                    existente.getId(), EstadoContrato.ACTIVO);
+
+            if (tieneContratoActivo) {
+                throw new IllegalStateException(
+                        "No se puede cambiar el estado de la propiedad: tiene un contrato activo vigente. " +
+                        "Debe finalizar o rescindir el contrato primero.");
+            }
+        }
 
         existente.setDireccion(datosNuevos.getDireccion());
         existente.setCiudad(datosNuevos.getCiudad());
@@ -69,21 +99,27 @@ public class PropiedadService {
         existente.setCantidadAmbientes(datosNuevos.getCantidadAmbientes());
         existente.setMetrosCuadrados(datosNuevos.getMetrosCuadrados());
         existente.setDescripcion(datosNuevos.getDescripcion());
+        existente.setComodidades(datosNuevos.getComodidades());
         existente.setEstadoDisponibilidad(datosNuevos.getEstadoDisponibilidad());
         existente.setPropietario(datosNuevos.getPropietario());
 
         Propiedad actualizada = propiedadRepository.save(existente);
+
         if (cambioEstado) {
             registrarHistorial(actualizada);
         }
+
         return actualizada;
     }
 
     public void eliminar(Long id) {
         Propiedad propiedad = buscarPorId(id);
+
         if (propiedad.getEstadoDisponibilidad() == EstadoDisponibilidad.ALQUILADA) {
-            throw new IllegalStateException("No se puede eliminar una propiedad con un contrato activo vigente.");
+            throw new IllegalStateException(
+                    "No se puede eliminar una propiedad con un contrato activo vigente.");
         }
+
         propiedad.setEliminada(true);
         propiedadRepository.save(propiedad);
     }
@@ -92,7 +128,8 @@ public class PropiedadService {
         HistorialEstadoPropiedad historial = new HistorialEstadoPropiedad(
                 propiedad.getEstadoDisponibilidad(),
                 LocalDateTime.now(),
-                propiedad);
+                propiedad
+        );
         historialRepository.save(historial);
     }
 }

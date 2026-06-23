@@ -14,7 +14,10 @@ public class Persona {
     private Long id;
 
     @NotBlank
-    private String nombreCompleto;
+    private String nombre;
+
+    @NotBlank
+    private String apellido;
 
     @NotBlank
     private String dniCuit;
@@ -30,8 +33,9 @@ public class Persona {
     public Persona() {
     }
 
-    public Persona(String nombreCompleto, String dniCuit, String telefono, String email, String domicilio) {
-        this.nombreCompleto = nombreCompleto;
+    public Persona(String nombre, String apellido, String dniCuit, String telefono, String email, String domicilio) {
+        this.nombre = nombre;
+        this.apellido = apellido;
         this.dniCuit = dniCuit;
         this.telefono = telefono;
         this.email = email;
@@ -46,12 +50,20 @@ public class Persona {
         this.id = id;
     }
 
-    public String getNombreCompleto() {
-        return nombreCompleto;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setNombreCompleto(String nombreCompleto) {
-        this.nombreCompleto = nombreCompleto;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public String getApellido() {
+        return apellido;
+    }
+
+    public void setApellido(String apellido) {
+        this.apellido = apellido;
     }
 
     public String getDniCuit() {
@@ -94,8 +106,13 @@ public class Persona {
         this.eliminada = eliminada;
     }
 
+    // Metodo util para mostrar nombre completo donde se necesite, sin guardar un campo extra
+    public String getNombreCompleto() {
+        return nombre + " " + apellido;
+    }
+
     @Override
     public String toString() {
-        return nombreCompleto;
+        return getNombreCompleto();
     }
 }

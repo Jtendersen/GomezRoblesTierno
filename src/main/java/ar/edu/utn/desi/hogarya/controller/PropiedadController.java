@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import ar.edu.utn.desi.hogarya.model.EstadoDisponibilidad;
 import ar.edu.utn.desi.hogarya.model.Propiedad;
+import ar.edu.utn.desi.hogarya.model.TipoPropiedad;
 import ar.edu.utn.desi.hogarya.repository.CiudadRepository;
 import ar.edu.utn.desi.hogarya.repository.PersonaRepository;
 import ar.edu.utn.desi.hogarya.service.PropiedadService;
@@ -30,13 +33,31 @@ public class PropiedadController {
     @Autowired
     private PersonaRepository personaRepository;
 
+    // ---------- LISTADO (con filtros opcionales) ----------
     @GetMapping
-    public String listar(Model model) {
-        List<Propiedad> propiedades = propiedadService.listarActivas();
+    public String listar(
+            @RequestParam(required = false) String direccion,
+            @RequestParam(required = false) Long ciudadId,
+            @RequestParam(required = false) TipoPropiedad tipo,
+            @RequestParam(required = false) EstadoDisponibilidad estado,
+            Model model) {
+
+        List<Propiedad> propiedades = propiedadService.buscarConFiltros(direccion, ciudadId, tipo, estado);
+
         model.addAttribute("propiedades", propiedades);
+        model.addAttribute("ciudades", ciudadRepository.findAll());
+        model.addAttribute("tipos", TipoPropiedad.values());
+        model.addAttribute("estados", EstadoDisponibilidad.values());
+
+        model.addAttribute("filtroDireccion", direccion);
+        model.addAttribute("filtroCiudadId", ciudadId);
+        model.addAttribute("filtroTipo", tipo);
+        model.addAttribute("filtroEstado", estado);
+
         return "propiedades/listado";
     }
 
+    // ---------- FORMULARIO DE ALTA ----------
     @GetMapping("/nueva")
     public String formularioAlta(Model model) {
         model.addAttribute("propiedad", new Propiedad());
@@ -45,6 +66,7 @@ public class PropiedadController {
         return "propiedades/formulario";
     }
 
+    // ---------- GUARDAR (alta o modificacion) ----------
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("propiedad") Propiedad propiedad, Model model) {
         try {
@@ -62,6 +84,7 @@ public class PropiedadController {
         }
     }
 
+    // ---------- FORMULARIO DE EDICION ----------
     @GetMapping("/editar/{id}")
     public String formularioEditar(@PathVariable Long id, Model model) {
         model.addAttribute("propiedad", propiedadService.buscarPorId(id));
@@ -70,6 +93,7 @@ public class PropiedadController {
         return "propiedades/formulario";
     }
 
+    // ---------- ELIMINAR (baja logica) ----------
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id) {
         propiedadService.eliminar(id);

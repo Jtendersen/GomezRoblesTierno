@@ -2,6 +2,7 @@ package ar.edu.utn.desi.hogarya;
 
 import ar.edu.utn.desi.hogarya.model.*;
 import ar.edu.utn.desi.hogarya.repository.CiudadRepository;
+import ar.edu.utn.desi.hogarya.repository.ProvinciaRepository;
 import ar.edu.utn.desi.hogarya.repository.PersonaRepository;
 import ar.edu.utn.desi.hogarya.service.ContratoService;
 import ar.edu.utn.desi.hogarya.service.PropiedadService;
@@ -15,44 +16,51 @@ import java.util.List;
 @Component
 public class DataInitializer implements CommandLineRunner {
 
-    private final CiudadRepository ciudadRepository;
-    private final PersonaRepository personaRepository;
-    private final PropiedadService propiedadService;
-    private final ContratoService contratoService;
+	private final CiudadRepository ciudadRepository;
+	private final ProvinciaRepository provinciaRepository;
+	private final PersonaRepository personaRepository;
+	private final PropiedadService propiedadService;
+	private final ContratoService contratoService;
 
-    public DataInitializer(CiudadRepository ciudadRepository,
-                           PersonaRepository personaRepository,
-                           PropiedadService propiedadService,
-                           ContratoService contratoService) {
-        this.ciudadRepository = ciudadRepository;
-        this.personaRepository = personaRepository;
-        this.propiedadService = propiedadService;
-        this.contratoService = contratoService;
-    }
+	public DataInitializer(CiudadRepository ciudadRepository,
+	                       ProvinciaRepository provinciaRepository,
+	                       PersonaRepository personaRepository,
+	                       PropiedadService propiedadService,
+	                       ContratoService contratoService) {
+	    this.ciudadRepository = ciudadRepository;
+	    this.provinciaRepository = provinciaRepository;
+	    this.personaRepository = personaRepository;
+	    this.propiedadService = propiedadService;
+	    this.contratoService = contratoService;
+	}
 
     @Override
     public void run(String... args) {
         if (ciudadRepository.count() > 0) return;
 
         // --- Ciudades ---
-        List<Ciudad> ciudades = ciudadRepository.saveAll(List.of(
-                new Ciudad("Santa Fe"),
-                new Ciudad("Rosario"),
-                new Ciudad("Córdoba"),
-                new Ciudad("Buenos Aires")
-        ));
+        Provincia provSantaFe = provinciaRepository.save(new Provincia("Santa Fe"));
+        Provincia provCordoba = provinciaRepository.save(new Provincia("Córdoba"));
+        Provincia provBsAs = provinciaRepository.save(new Provincia("Buenos Aires"));
 
+        List<Ciudad> ciudades = ciudadRepository.saveAll(List.of(
+                new Ciudad("Santa Fe", provSantaFe),
+                new Ciudad("Rosario", provSantaFe),
+                new Ciudad("Córdoba", provCordoba),
+                new Ciudad("Buenos Aires", provBsAs)
+        ));
+        
         Ciudad santaFe = ciudades.get(0);
         Ciudad rosario = ciudades.get(1);
         Ciudad cordoba = ciudades.get(2);
 
         // --- Personas ---
         List<Persona> personas = personaRepository.saveAll(List.of(
-                new Persona("Carlos Pérez",     "20-11111111-1", "342-4001111", "cperez@mail.com",    "Av. San Martín 100, Santa Fe"),
-                new Persona("Ana García",        "27-22222222-2", "341-4002222", "agarcia@mail.com",   "Bv. Oroño 200, Rosario"),
-                new Persona("Luis Martínez",     "20-33333333-3", "351-4003333", "lmartinez@mail.com", "Av. Colón 300, Córdoba"),
-                new Persona("María López",       "27-44444444-4", "011-40044444", "mlopez@mail.com",   "Corrientes 400, Buenos Aires"),
-                new Persona("Roberto Fernández", "20-55555555-5", "342-4005555", "rfernandez@mail.com","San Jerónimo 500, Santa Fe")
+                new Persona("Carlos", "Pérez",     "20-11111111-1", "342-4001111", "cperez@mail.com",    "Av. San Martín 100, Santa Fe"),
+                new Persona("Ana", "García",        "27-22222222-2", "341-4002222", "agarcia@mail.com",   "Bv. Oroño 200, Rosario"),
+                new Persona("Luis", "Martínez",     "20-33333333-3", "351-4003333", "lmartinez@mail.com", "Av. Colón 300, Córdoba"),
+                new Persona("María", "López",       "27-44444444-4", "011-40044444", "mlopez@mail.com",   "Corrientes 400, Buenos Aires"),
+                new Persona("Roberto", "Fernández", "20-55555555-5", "342-4005555", "rfernandez@mail.com","San Jerónimo 500, Santa Fe")
         ));
 
         Persona carlos  = personas.get(0);
