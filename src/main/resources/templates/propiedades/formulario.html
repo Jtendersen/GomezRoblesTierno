@@ -46,9 +46,12 @@
         <label>Metros Cuadrados</label>
         <input type="number" min="1" step="0.01" th:field="*{metrosCuadrados}" required />
 
-        <label>Descripcion</label>
-        <textarea th:field="*{descripcion}" required></textarea>
+		<label>Descripcion</label>
+		<textarea th:field="*{descripcion}" required></textarea>
 
+		<label>Comodidades</label>
+		<textarea th:field="*{comodidades}"></textarea>
+		
         <label>Estado de Disponibilidad</label>
         <select th:field="*{estadoDisponibilidad}" required>
             <option th:each="e : ${T(ar.edu.utn.desi.hogarya.model.EstadoDisponibilidad).values()}"

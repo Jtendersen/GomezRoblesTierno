@@ -40,6 +40,8 @@ public class Propiedad {
     @NotBlank
     private String descripcion;
 
+    private String comodidades;
+
     @NotNull
     @Enumerated(EnumType.STRING)
     private EstadoDisponibilidad estadoDisponibilidad = EstadoDisponibilidad.DISPONIBLE;
@@ -107,6 +109,14 @@ public class Propiedad {
 
     public void setDescripcion(String descripcion) {
         this.descripcion = descripcion;
+    }
+
+    public String getComodidades() {
+        return comodidades;
+    }
+
+    public void setComodidades(String comodidades) {
+        this.comodidades = comodidades;
     }
 
     public EstadoDisponibilidad getEstadoDisponibilidad() {
