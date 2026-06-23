@@ -5,6 +5,7 @@ import ar.edu.utn.desi.hogarya.repository.CiudadRepository;
 import ar.edu.utn.desi.hogarya.repository.ProvinciaRepository;
 import ar.edu.utn.desi.hogarya.repository.PersonaRepository;
 import ar.edu.utn.desi.hogarya.service.ContratoService;
+import ar.edu.utn.desi.hogarya.service.FacturaService;
 import ar.edu.utn.desi.hogarya.service.PropiedadService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -21,17 +22,20 @@ public class DataInitializer implements CommandLineRunner {
 	private final PersonaRepository personaRepository;
 	private final PropiedadService propiedadService;
 	private final ContratoService contratoService;
+	private final FacturaService facturaService;
 
 	public DataInitializer(CiudadRepository ciudadRepository,
 	                       ProvinciaRepository provinciaRepository,
 	                       PersonaRepository personaRepository,
 	                       PropiedadService propiedadService,
-	                       ContratoService contratoService) {
+	                       ContratoService contratoService,
+	                       FacturaService facturaService) {
 	    this.ciudadRepository = ciudadRepository;
 	    this.provinciaRepository = provinciaRepository;
 	    this.personaRepository = personaRepository;
 	    this.propiedadService = propiedadService;
 	    this.contratoService = contratoService;
+	    this.facturaService = facturaService;
 	}
 
     @Override
@@ -137,7 +141,7 @@ public class DataInitializer implements CommandLineRunner {
         c2.setDiaVencimientoMensual(5);
         c2.setDescripcion("Contrato vigente de alquiler de casa.");
         Contrato c2Guardado = contratoService.crear(c2);
-        contratoService.cambiarEstado(c2Guardado.getId(), EstadoContrato.ACTIVO);
+        Contrato c2Activo = contratoService.cambiarEstado(c2Guardado.getId(), EstadoContrato.ACTIVO);
 
         // Contrato 3: FINALIZADO — p3 vuelve a DISPONIBLE
         Contrato c3 = new Contrato();
@@ -151,5 +155,42 @@ public class DataInitializer implements CommandLineRunner {
         Contrato c3Guardado = contratoService.crear(c3);
         contratoService.cambiarEstado(c3Guardado.getId(), EstadoContrato.ACTIVO);
         contratoService.cambiarEstado(c3Guardado.getId(), EstadoContrato.FINALIZADO);
+
+        // --- Facturas (sobre el contrato ACTIVO c2) ---
+
+        // Factura 1: PENDIENTE
+        Factura f1 = new Factura();
+        f1.setContrato(c2Activo);
+        f1.setConceptoFacturado("Alquiler Junio 2026");
+        f1.setImporte(new BigDecimal("120000.00"));
+        f1.setFechaEmision(LocalDate.of(2026, 6, 1));
+        f1.setFechaVencimiento(LocalDate.of(2026, 6, 5));
+        facturaService.crear(f1);
+
+        // Factura 2: VENCIDA
+        Factura f2 = new Factura();
+        f2.setContrato(c2Activo);
+        f2.setConceptoFacturado("Alquiler Mayo 2026");
+        f2.setImporte(new BigDecimal("120000.00"));
+        f2.setFechaEmision(LocalDate.of(2026, 5, 1));
+        f2.setFechaVencimiento(LocalDate.of(2026, 5, 5));
+        Factura f2Guardada = facturaService.crear(f2);
+        facturaService.marcarVencida(f2Guardada.getId());
+
+        // Factura 3: PAGADA con datos de pago completos
+        Factura f3 = new Factura();
+        f3.setContrato(c2Activo);
+        f3.setConceptoFacturado("Alquiler Abril 2026");
+        f3.setImporte(new BigDecimal("120000.00"));
+        f3.setFechaEmision(LocalDate.of(2026, 4, 1));
+        f3.setFechaVencimiento(LocalDate.of(2026, 4, 5));
+        Factura f3Guardada = facturaService.crear(f3);
+        facturaService.registrarPago(
+                f3Guardada.getId(),
+                LocalDate.of(2026, 4, 3),
+                MedioPago.TRANSFERENCIA,
+                new BigDecimal("120000.00"),
+                BigDecimal.ZERO
+        );
     }
 }
