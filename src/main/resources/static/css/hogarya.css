@@ -370,6 +370,21 @@ tbody td {
   margin-top: 6px;
 }
 
+/* ---- Columna de acciones en tablas ---- */
+.acciones {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+}
+
+.acciones .btn {
+    padding: 5px 12px;
+    font-size: 0.8rem;
+    width: 100%;
+    text-align: center;
+}
+
 /* ---- Divider ---- */
 hr {
   border: none;
