@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Publicaciones — HogarYA</title>
+    <link rel="stylesheet" th:href="@{/css/hogarya.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <a class="logo" th:href="@{/}"><img th:src="@{/images/logo.png}" alt="HogarYA"/></a>
+    <nav>
+        <a th:href="@{/propiedades}">Propiedades</a>
+        <a th:href="@{/publicaciones}" class="active">Publicaciones</a>
+        <a th:href="@{/contratos}">Contratos</a>
+        <a th:href="@{/facturas}">Facturas</a>
+    </nav>
+</nav>
+
+<div class="main-content">
+
+    <div class="page-header">
+        <h1>Publicaciones</h1>
+        <a class="btn btn-primary" th:href="@{/publicaciones/alta}">+ Nueva Publicación</a>
+    </div>
+
+    <!-- Mensajes flash -->
+    <div class="alert alert-success" th:if="${exito}" th:text="${exito}"></div>
+    <div class="alert alert-error"   th:if="${error}"  th:text="${error}"></div>
+
+    <!-- Filtros (HU 2.4) -->
+    <form th:action="@{/publicaciones}" method="get" class="filtros">
+        <div class="form-group">
+            <label>Propiedad</label>
+            <select name="idPropiedad">
+                <option value="">— Todas —</option>
+                <option th:each="p : ${listaPropiedades}"
+                        th:value="${p.id}"
+                        th:text="${p.direccion + ' - ' + p.ciudad.nombre}"
+                        th:selected="${p.id == filtroIdPropiedad}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Estado</label>
+            <select name="estado">
+                <option value="">— Todos —</option>
+                <option th:each="e : ${listaEstados}"
+                        th:value="${e}"
+                        th:text="${e}"
+                        th:selected="${e == filtroEstado}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Precio mín.</label>
+            <input type="number" name="precioMin" step="0.01" min="0"
+                   th:value="${filtroPrecioMin}" placeholder="0"/>
+        </div>
+        <div class="form-group">
+            <label>Precio máx.</label>
+            <input type="number" name="precioMax" step="0.01" min="0"
+                   th:value="${filtroPrecioMax}" placeholder="Sin límite"/>
+        </div>
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+            <button type="submit" class="btn btn-secondary">Buscar</button>
+            <a th:href="@{/publicaciones}" class="btn btn-neutral">Limpiar</a>
+        </div>
+    </form>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Dirección</th>
+                    <th>Ciudad</th>
+                    <th>Precio Mensual</th>
+                    <th>Fecha Publicación</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:if="${#lists.isEmpty(publicaciones)}">
+                    <td colspan="7" style="text-align:center; color:#6b7f96;">No hay publicaciones registradas.</td>
+                </tr>
+                <tr th:each="pub : ${publicaciones}">
+                    <td th:text="${pub.id}"></td>
+                    <td th:text="${pub.propiedad.direccion}"></td>
+                    <td th:text="${pub.propiedad.ciudad.nombre}"></td>
+                    <td th:text="'$' + ${pub.precioMensual}"></td>
+                    <td th:text="${pub.fechaPublicacion}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="'badge-' + ${pub.estado.name()}"
+                              th:text="${pub.estado}"></span>
+                    </td>
+                    <td>
+                        <a class="btn btn-primary" th:href="@{/publicaciones/editar/{id}(id=${pub.id})}">Editar</a>
+                        <a class="btn btn-danger"
+                           th:href="@{/publicaciones/eliminar/{id}(id=${pub.id})}"
+                           onclick="return confirm('¿Eliminar esta publicación?')">Eliminar</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<footer class="footer">HogarYA &mdash; Grupo GomezRoblesTierno &mdash; UTN FRSF DESI 2026</footer>
+</body>
+</html>
