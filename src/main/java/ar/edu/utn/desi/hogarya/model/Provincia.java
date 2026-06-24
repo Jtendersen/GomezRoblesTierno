@@ -4,11 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.validation.constraints.NotNull;
 
 @Entity
-public class Ciudad {
+public class Provincia {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,16 +14,11 @@ public class Ciudad {
 
     private String nombre;
 
-    @ManyToOne
-    @NotNull
-    private Provincia provincia;
-
-    public Ciudad() {
+    public Provincia() {
     }
 
-    public Ciudad(String nombre, Provincia provincia) {
+    public Provincia(String nombre) {
         this.nombre = nombre;
-        this.provincia = provincia;
     }
 
     public Long getId() {
@@ -44,16 +37,8 @@ public class Ciudad {
         this.nombre = nombre;
     }
 
-    public Provincia getProvincia() {
-        return provincia;
-    }
-
-    public void setProvincia(Provincia provincia) {
-        this.provincia = provincia;
-    }
-
     @Override
     public String toString() {
-        return nombre + " (" + provincia + ")";
+        return nombre;
     }
 }

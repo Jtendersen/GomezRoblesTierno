@@ -1,69 +1,91 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Formulario de Propiedad</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 30px; }
-        form { max-width: 500px; }
-        label { display: block; margin-top: 12px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
-        .btn { padding: 10px 20px; margin-top: 20px; border: none; cursor: pointer; border-radius: 4px; color: white; }
-        .btn-guardar { background-color: #27ae60; }
-        .error { color: #e74c3c; font-weight: bold; padding: 10px; border: 1px solid #e74c3c; margin-bottom: 15px; }
-    </style>
+    <meta charset="UTF-8"/>
+    <title>Propiedad — HogarYA</title>
+    <link rel="stylesheet" th:href="@{/css/hogarya.css}"/>
 </head>
 <body>
 
-    <h1 th:if="${propiedad.id == null}">Nueva Propiedad</h1>
-    <h1 th:if="${propiedad.id != null}">Editar Propiedad</h1>
+<nav class="navbar">
+    <a class="logo" th:href="@{/}"><img th:src="@{/images/logo.png}" alt="HogarYA"/></a>
+    <nav>
+        <a th:href="@{/propiedades}" class="active">Propiedades</a>
+        <a th:href="@{/publicaciones}">Publicaciones</a>
+        <a th:href="@{/contratos}">Contratos</a>
+        <a th:href="@{/facturas}">Facturas</a>
+    </nav>
+</nav>
 
-    <div class="error" th:if="${error}" th:text="${error}"></div>
+<div class="main-content">
+    <div class="page-header">
+        <h1 th:text="${propiedad.id == null} ? 'Nueva Propiedad' : 'Editar Propiedad #' + propiedad.id"></h1>
+    </div>
 
-    <form th:action="@{/propiedades/guardar}" th:object="${propiedad}" method="post">
+    <div class="card" style="max-width:560px;">
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
 
-        <input type="hidden" th:field="*{id}" />
+        <form th:action="@{/propiedades/guardar}" th:object="${propiedad}" method="post">
+            <input type="hidden" th:field="*{id}"/>
 
-        <label>Direccion</label>
-        <input type="text" th:field="*{direccion}" required />
+            <div class="form-group">
+                <label>Dirección</label>
+                <input type="text" th:field="*{direccion}" required/>
+            </div>
+            <div class="form-group">
+                <label>Ciudad</label>
+                <select th:field="*{ciudad}" required>
+                    <option value="">— Seleccione —</option>
+                    <option th:each="c : ${ciudades}" th:value="${c.id}" th:text="${c.nombre}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tipo de Propiedad</label>
+                <select th:field="*{tipo}" required>
+                    <option value="">— Seleccione —</option>
+                    <option th:each="t : ${T(ar.edu.utn.desi.hogarya.model.TipoPropiedad).values()}"
+                            th:value="${t}" th:text="${t}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Cantidad de Ambientes</label>
+                <input type="number" min="1" th:field="*{cantidadAmbientes}" required/>
+            </div>
+            <div class="form-group">
+                <label>Metros Cuadrados</label>
+                <input type="number" min="1" step="0.01" th:field="*{metrosCuadrados}" required/>
+            </div>
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea th:field="*{descripcion}" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Comodidades</label>
+                <textarea th:field="*{comodidades}" placeholder="Ej: Cochera, Pileta, Balcón..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Estado de Disponibilidad</label>
+                <select th:field="*{estadoDisponibilidad}" required>
+                    <option th:each="e : ${T(ar.edu.utn.desi.hogarya.model.EstadoDisponibilidad).values()}"
+                            th:value="${e}" th:text="${e}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Propietario</label>
+                <select th:field="*{propietario}" required>
+                    <option value="">— Seleccione —</option>
+                    <option th:each="p : ${propietarios}" th:value="${p.id}" th:text="${p.nombreCompleto}"></option>
+                </select>
+            </div>
 
-        <label>Ciudad</label>
-        <select th:field="*{ciudad}" required>
-            <option value="">-- Seleccione --</option>
-            <option th:each="c : ${ciudades}" th:value="${c.id}" th:text="${c.nombre}"></option>
-        </select>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a class="btn btn-neutral" th:href="@{/propiedades}">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
 
-        <label>Tipo de Propiedad</label>
-        <select th:field="*{tipo}" required>
-            <option value="">-- Seleccione --</option>
-            <option th:each="t : ${T(ar.edu.utn.desi.hogarya.model.TipoPropiedad).values()}"
-                    th:value="${t}" th:text="${t}"></option>
-        </select>
-
-        <label>Cantidad de Ambientes</label>
-        <input type="number" min="1" th:field="*{cantidadAmbientes}" required />
-
-        <label>Metros Cuadrados</label>
-        <input type="number" min="1" step="0.01" th:field="*{metrosCuadrados}" required />
-
-        <label>Descripcion</label>
-        <textarea th:field="*{descripcion}" required></textarea>
-
-        <label>Estado de Disponibilidad</label>
-        <select th:field="*{estadoDisponibilidad}" required>
-            <option th:each="e : ${T(ar.edu.utn.desi.hogarya.model.EstadoDisponibilidad).values()}"
-                    th:value="${e}" th:text="${e}"></option>
-        </select>
-
-        <label>Propietario</label>
-        <select th:field="*{propietario}" required>
-            <option value="">-- Seleccione --</option>
-            <option th:each="p : ${propietarios}" th:value="${p.id}" th:text="${p.nombreCompleto}"></option>
-        </select>
-
-        <button type="submit" class="btn btn-guardar">Guardar</button>
-
-    </form>
-
+<footer class="footer">HogarYA &mdash; Grupo GomezRoblesTierno &mdash; UTN FRSF DESI 2026</footer>
 </body>
 </html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Factura — HogarYA</title>
+    <link rel="stylesheet" th:href="@{/css/hogarya.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <a class="logo" th:href="@{/}"><img th:src="@{/images/logo.png}" alt="HogarYA"/></a>
+    <nav>
+        <a th:href="@{/propiedades}">Propiedades</a>
+        <a th:href="@{/publicaciones}">Publicaciones</a>
+        <a th:href="@{/contratos}">Contratos</a>
+        <a th:href="@{/facturas}" class="active">Facturas</a>
+    </nav>
+</nav>
+
+<div class="main-content">
+    <div class="page-header">
+        <h1 th:text="${factura.id == null} ? 'Nueva Factura' : 'Editar Factura #' + factura.id"></h1>
+    </div>
+
+    <div class="card" style="max-width:560px;">
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+        <!-- Alta -->
+        <form th:if="${factura.id == null}" th:action="@{/facturas/guardar}" th:object="${factura}" method="post">
+            <div class="form-group">
+                <label>Contrato</label>
+                <select th:field="*{contrato.id}" required>
+                    <option value="">— Seleccione un contrato —</option>
+                    <option th:each="c : ${contratos}"
+                            th:value="${c.id}"
+                            th:text="${c.propiedad.direccion + ' — ' + c.propiedad.ciudad.nombre + ' | ' + c.inquilino.nombreCompleto}">
+                    </option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Concepto Facturado</label>
+                <input type="text" th:field="*{conceptoFacturado}" placeholder="Ej: Alquiler Junio 2026" required/>
+            </div>
+            <div class="form-group">
+                <label>Importe ($)</label>
+                <input type="number" step="0.01" min="0.01" th:field="*{importe}" required/>
+            </div>
+            <div class="form-group">
+                <label>Fecha de Emisión</label>
+                <input type="date" th:field="*{fechaEmision}" required/>
+            </div>
+            <div class="form-group">
+                <label>Fecha de Vencimiento</label>
+                <input type="date" th:field="*{fechaVencimiento}" required/>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a class="btn btn-neutral" th:href="@{/facturas}">Cancelar</a>
+            </div>
+        </form>
+
+        <!-- Edición -->
+        <form th:if="${factura.id != null}" th:action="@{/facturas/actualizar/{id}(id=${factura.id})}" th:object="${factura}" method="post">
+            <div class="form-group">
+                <label>Contrato</label>
+                <input type="text" disabled
+                       th:value="${factura.contrato.propiedad.direccion + ' — ' + factura.contrato.propiedad.ciudad.nombre + ' | ' + factura.contrato.inquilino.nombreCompleto}"/>
+            </div>
+            <div class="form-group">
+                <label>Concepto Facturado</label>
+                <input type="text" th:field="*{conceptoFacturado}" required/>
+            </div>
+            <div class="form-group">
+                <label>Importe ($)</label>
+                <input type="number" step="0.01" min="0.01" th:field="*{importe}" required/>
+            </div>
+            <div class="form-group">
+                <label>Fecha de Emisión</label>
+                <input type="date" th:field="*{fechaEmision}" required/>
+            </div>
+            <div class="form-group">
+                <label>Fecha de Vencimiento</label>
+                <input type="date" th:field="*{fechaVencimiento}" required/>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+                <a class="btn btn-neutral" th:href="@{/facturas}">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<footer class="footer">HogarYA &mdash; Grupo GomezRoblesTierno &mdash; UTN FRSF DESI 2026</footer>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Facturas — HogarYA</title>
+    <link rel="stylesheet" th:href="@{/css/hogarya.css}"/>
+</head>
+<body>
+
+<nav class="navbar">
+    <a class="logo" th:href="@{/}"><img th:src="@{/images/logo.png}" alt="HogarYA"/></a>
+    <nav>
+        <a th:href="@{/propiedades}">Propiedades</a>
+        <a th:href="@{/publicaciones}">Publicaciones</a>
+        <a th:href="@{/contratos}">Contratos</a>
+        <a th:href="@{/facturas}" class="active">Facturas</a>
+    </nav>
+</nav>
+
+<div class="main-content">
+
+    <div class="page-header">
+        <h1>Facturas</h1>
+        <a class="btn btn-primary" th:href="@{/facturas/nueva}">+ Nueva Factura</a>
+    </div>
+
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Propiedad</th>
+                    <th>Inquilino</th>
+                    <th>Concepto</th>
+                    <th>Importe</th>
+                    <th>Emisión</th>
+                    <th>Vencimiento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="f : ${facturas}">
+                    <td th:text="${f.id}"></td>
+                    <td th:text="${f.contrato.propiedad.direccion + ' — ' + f.contrato.propiedad.ciudad.nombre}"></td>
+                    <td th:text="${f.contrato.inquilino.nombreCompleto}"></td>
+                    <td th:text="${f.conceptoFacturado}"></td>
+                    <td th:text="${'$' + #numbers.formatDecimal(f.importe, 1, 2)}"></td>
+                    <td th:text="${#temporals.format(f.fechaEmision, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${#temporals.format(f.fechaVencimiento, 'dd/MM/yyyy')}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="'badge-' + ${f.estado.name()}"
+                              th:text="${f.estado}"></span>
+                    </td>
+                    <td class="acciones">
+                        <a th:if="${f.estado.name() == 'PENDIENTE'}"
+                           class="btn btn-primary"
+                           th:href="@{/facturas/editar/{id}(id=${f.id})}">Editar</a>
+
+                        <a th:if="${f.estado.name() == 'PENDIENTE'}"
+                           class="btn btn-vencer"
+                           th:href="@{/facturas/vencer/{id}(id=${f.id})}"
+                           onclick="return confirm('¿Marcar como VENCIDA?')">Vencer</a>
+
+                        <a th:if="${f.estado.name() == 'PENDIENTE'}"
+                           class="btn btn-neutral"
+                           th:href="@{/facturas/anular/{id}(id=${f.id})}"
+                           onclick="return confirm('¿Anular esta factura?')">Anular</a>
+
+                        <a th:if="${f.estado.name() == 'PENDIENTE' or f.estado.name() == 'VENCIDA'}"
+                           class="btn btn-pagar"
+                           th:href="@{/facturas/pagar/{id}(id=${f.id})}">Registrar Pago</a>
+
+                        <a th:if="${f.estado.name() == 'PENDIENTE' or f.estado.name() == 'VENCIDA'}"
+                           class="btn btn-danger"
+                           th:href="@{/facturas/eliminar/{id}(id=${f.id})}"
+                           onclick="return confirm('¿Eliminar esta factura?')">Eliminar</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<footer class="footer">HogarYA &mdash; Grupo GomezRoblesTierno &mdash; UTN FRSF DESI 2026</footer>
+</body>
+</html>

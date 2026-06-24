@@ -2,8 +2,10 @@ package ar.edu.utn.desi.hogarya;
 
 import ar.edu.utn.desi.hogarya.model.*;
 import ar.edu.utn.desi.hogarya.repository.CiudadRepository;
+import ar.edu.utn.desi.hogarya.repository.ProvinciaRepository;
 import ar.edu.utn.desi.hogarya.repository.PersonaRepository;
 import ar.edu.utn.desi.hogarya.service.ContratoService;
+import ar.edu.utn.desi.hogarya.service.FacturaService;
 import ar.edu.utn.desi.hogarya.service.PropiedadService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -15,44 +17,54 @@ import java.util.List;
 @Component
 public class DataInitializer implements CommandLineRunner {
 
-    private final CiudadRepository ciudadRepository;
-    private final PersonaRepository personaRepository;
-    private final PropiedadService propiedadService;
-    private final ContratoService contratoService;
+	private final CiudadRepository ciudadRepository;
+	private final ProvinciaRepository provinciaRepository;
+	private final PersonaRepository personaRepository;
+	private final PropiedadService propiedadService;
+	private final ContratoService contratoService;
+	private final FacturaService facturaService;
 
-    public DataInitializer(CiudadRepository ciudadRepository,
-                           PersonaRepository personaRepository,
-                           PropiedadService propiedadService,
-                           ContratoService contratoService) {
-        this.ciudadRepository = ciudadRepository;
-        this.personaRepository = personaRepository;
-        this.propiedadService = propiedadService;
-        this.contratoService = contratoService;
-    }
+	public DataInitializer(CiudadRepository ciudadRepository,
+	                       ProvinciaRepository provinciaRepository,
+	                       PersonaRepository personaRepository,
+	                       PropiedadService propiedadService,
+	                       ContratoService contratoService,
+	                       FacturaService facturaService) {
+	    this.ciudadRepository = ciudadRepository;
+	    this.provinciaRepository = provinciaRepository;
+	    this.personaRepository = personaRepository;
+	    this.propiedadService = propiedadService;
+	    this.contratoService = contratoService;
+	    this.facturaService = facturaService;
+	}
 
     @Override
     public void run(String... args) {
         if (ciudadRepository.count() > 0) return;
 
         // --- Ciudades ---
-        List<Ciudad> ciudades = ciudadRepository.saveAll(List.of(
-                new Ciudad("Santa Fe"),
-                new Ciudad("Rosario"),
-                new Ciudad("Córdoba"),
-                new Ciudad("Buenos Aires")
-        ));
+        Provincia provSantaFe = provinciaRepository.save(new Provincia("Santa Fe"));
+        Provincia provCordoba = provinciaRepository.save(new Provincia("Córdoba"));
+        Provincia provBsAs = provinciaRepository.save(new Provincia("Buenos Aires"));
 
+        List<Ciudad> ciudades = ciudadRepository.saveAll(List.of(
+                new Ciudad("Santa Fe", provSantaFe),
+                new Ciudad("Rosario", provSantaFe),
+                new Ciudad("Córdoba", provCordoba),
+                new Ciudad("Buenos Aires", provBsAs)
+        ));
+        
         Ciudad santaFe = ciudades.get(0);
         Ciudad rosario = ciudades.get(1);
         Ciudad cordoba = ciudades.get(2);
 
         // --- Personas ---
         List<Persona> personas = personaRepository.saveAll(List.of(
-                new Persona("Carlos Pérez",     "20-11111111-1", "342-4001111", "cperez@mail.com",    "Av. San Martín 100, Santa Fe"),
-                new Persona("Ana García",        "27-22222222-2", "341-4002222", "agarcia@mail.com",   "Bv. Oroño 200, Rosario"),
-                new Persona("Luis Martínez",     "20-33333333-3", "351-4003333", "lmartinez@mail.com", "Av. Colón 300, Córdoba"),
-                new Persona("María López",       "27-44444444-4", "011-40044444", "mlopez@mail.com",   "Corrientes 400, Buenos Aires"),
-                new Persona("Roberto Fernández", "20-55555555-5", "342-4005555", "rfernandez@mail.com","San Jerónimo 500, Santa Fe")
+                new Persona("Carlos", "Pérez",     "20-11111111-1", "342-4001111", "cperez@mail.com",    "Av. San Martín 100, Santa Fe"),
+                new Persona("Ana", "García",        "27-22222222-2", "341-4002222", "agarcia@mail.com",   "Bv. Oroño 200, Rosario"),
+                new Persona("Luis", "Martínez",     "20-33333333-3", "351-4003333", "lmartinez@mail.com", "Av. Colón 300, Córdoba"),
+                new Persona("María", "López",       "27-44444444-4", "011-40044444", "mlopez@mail.com",   "Corrientes 400, Buenos Aires"),
+                new Persona("Roberto", "Fernández", "20-55555555-5", "342-4005555", "rfernandez@mail.com","San Jerónimo 500, Santa Fe")
         ));
 
         Persona carlos  = personas.get(0);
@@ -129,7 +141,7 @@ public class DataInitializer implements CommandLineRunner {
         c2.setDiaVencimientoMensual(5);
         c2.setDescripcion("Contrato vigente de alquiler de casa.");
         Contrato c2Guardado = contratoService.crear(c2);
-        contratoService.cambiarEstado(c2Guardado.getId(), EstadoContrato.ACTIVO);
+        Contrato c2Activo = contratoService.cambiarEstado(c2Guardado.getId(), EstadoContrato.ACTIVO);
 
         // Contrato 3: FINALIZADO — p3 vuelve a DISPONIBLE
         Contrato c3 = new Contrato();
@@ -143,5 +155,42 @@ public class DataInitializer implements CommandLineRunner {
         Contrato c3Guardado = contratoService.crear(c3);
         contratoService.cambiarEstado(c3Guardado.getId(), EstadoContrato.ACTIVO);
         contratoService.cambiarEstado(c3Guardado.getId(), EstadoContrato.FINALIZADO);
+
+        // --- Facturas (sobre el contrato ACTIVO c2) ---
+
+        // Factura 1: PENDIENTE
+        Factura f1 = new Factura();
+        f1.setContrato(c2Activo);
+        f1.setConceptoFacturado("Alquiler Junio 2026");
+        f1.setImporte(new BigDecimal("120000.00"));
+        f1.setFechaEmision(LocalDate.of(2026, 6, 1));
+        f1.setFechaVencimiento(LocalDate.of(2026, 6, 5));
+        facturaService.crear(f1);
+
+        // Factura 2: VENCIDA
+        Factura f2 = new Factura();
+        f2.setContrato(c2Activo);
+        f2.setConceptoFacturado("Alquiler Mayo 2026");
+        f2.setImporte(new BigDecimal("120000.00"));
+        f2.setFechaEmision(LocalDate.of(2026, 5, 1));
+        f2.setFechaVencimiento(LocalDate.of(2026, 5, 5));
+        Factura f2Guardada = facturaService.crear(f2);
+        facturaService.marcarVencida(f2Guardada.getId());
+
+        // Factura 3: PAGADA con datos de pago completos
+        Factura f3 = new Factura();
+        f3.setContrato(c2Activo);
+        f3.setConceptoFacturado("Alquiler Abril 2026");
+        f3.setImporte(new BigDecimal("120000.00"));
+        f3.setFechaEmision(LocalDate.of(2026, 4, 1));
+        f3.setFechaVencimiento(LocalDate.of(2026, 4, 5));
+        Factura f3Guardada = facturaService.crear(f3);
+        facturaService.registrarPago(
+                f3Guardada.getId(),
+                LocalDate.of(2026, 4, 3),
+                MedioPago.TRANSFERENCIA,
+                new BigDecimal("120000.00"),
+                BigDecimal.ZERO
+        );
     }
 }
