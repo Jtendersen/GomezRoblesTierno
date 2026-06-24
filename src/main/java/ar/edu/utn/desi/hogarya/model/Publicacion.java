@@ -1,6 +1,7 @@
 package ar.edu.utn.desi.hogarya.model;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
@@ -15,11 +16,11 @@ public class Publicacion {
     private Propiedad propiedad;
 
     @Column(nullable = false)
-    private Double precioMensual;
+    private BigDecimal precioMensual;
 
     private String condiciones;
     private String descripcion;
-    private LocalDate fecha;
+    private LocalDate fechaPublicacion;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -35,14 +36,14 @@ public class Publicacion {
     public void setId(Long id) { this.id = id; }
     public Propiedad getPropiedad() { return propiedad; }
     public void setPropiedad(Propiedad propiedad) { this.propiedad = propiedad; }
-    public Double getPrecioMensual() { return precioMensual; }
-    public void setPrecioMensual(Double precioMensual) { this.precioMensual = precioMensual; }
+    public BigDecimal getPrecioMensual() { return precioMensual; }
+    public void setPrecioMensual(BigDecimal precioMensual) { this.precioMensual = precioMensual; }
     public String getCondiciones() { return condiciones; }
     public void setCondiciones(String condiciones) { this.condiciones = condiciones; }
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
-    public LocalDate getFecha() { return fecha; }
-    public void setFecha(LocalDate fecha) { this.fecha = fecha; }
+    public LocalDate getFechaPublicacion() { return fechaPublicacion; }
+    public void setFechaPublicacion(LocalDate fechaPublicacion) { this.fechaPublicacion = fechaPublicacion; }
     public EstadoPublicacion getEstado() { return estado; }
     public void setEstado(EstadoPublicacion estado) { this.estado = estado; }
     public boolean isEliminada() { return eliminada; }

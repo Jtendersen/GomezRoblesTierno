@@ -3,6 +3,7 @@ package ar.edu.utn.desi.hogarya.model;
 import jakarta.validation.constraints.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public class PublicacionForm {
@@ -13,8 +14,8 @@ public class PublicacionForm {
     private Long idPropiedad;
 
     @NotNull(message = "El precio es obligatorio")
-    @Positive(message = "El precio mensual debe ser mayor a 0")
-    private Double precioMensual;
+    @DecimalMin(value = "0.01", message = "El precio mensual debe ser mayor a 0")
+    private BigDecimal precioMensual;
 
     @NotBlank(message = "Las condiciones no pueden estar vacías")
     private String condiciones;
@@ -34,8 +35,8 @@ public class PublicacionForm {
     public void setId(Long id) { this.id = id; }
     public Long getIdPropiedad() { return idPropiedad; }
     public void setIdPropiedad(Long idPropiedad) { this.idPropiedad = idPropiedad; }
-    public Double getPrecioMensual() { return precioMensual; }
-    public void setPrecioMensual(Double precioMensual) { this.precioMensual = precioMensual; }
+    public BigDecimal getPrecioMensual() { return precioMensual; }
+    public void setPrecioMensual(BigDecimal precioMensual) { this.precioMensual = precioMensual; }
     public String getCondiciones() { return condiciones; }
     public void setCondiciones(String condiciones) { this.condiciones = condiciones; }
     public String getDescripcion() { return descripcion; }

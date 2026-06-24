@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -60,12 +61,12 @@ public class PublicacionServiceImpl implements IPublicacionService {
             // La propiedad no se puede cambiar en edición (HU 2.3)
             // La fecha de publicación se mantiene la original si no se envía nueva
             if (form.getFechaPublicacion() != null) {
-                pub.setFecha(form.getFechaPublicacion());
+                pub.setFechaPublicacion(form.getFechaPublicacion());
             }
         } else {
             // Alta
             pub = new Publicacion();
-            pub.setFecha(form.getFechaPublicacion());
+            pub.setFechaPublicacion(form.getFechaPublicacion());
         }
 
         pub.setPropiedad(propiedad);
@@ -100,7 +101,13 @@ public class PublicacionServiceImpl implements IPublicacionService {
     }
 
     @Override
-    public List<Publicacion> listarConFiltros(Long idPropiedad, Long idCiudad, EstadoPublicacion estado, Double min, Double max) {
+    public Publicacion buscarPorId(Long id) {
+        return publicacionRepo.findById(id)
+                .orElseThrow(() -> new PublicacionException("Publicación no encontrada."));
+    }
+
+    @Override
+    public List<Publicacion> listarConFiltros(Long idPropiedad, Long idCiudad, EstadoPublicacion estado, BigDecimal min, BigDecimal max) {
         return publicacionRepo.buscarConFiltros(idPropiedad, idCiudad, estado, min, max);
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 public interface IPublicacionRepo extends JpaRepository<Publicacion, Long> {
@@ -26,6 +27,6 @@ public interface IPublicacionRepo extends JpaRepository<Publicacion, Long> {
     List<Publicacion> buscarConFiltros(@Param("idPropiedad") Long idPropiedad,
                                        @Param("idCiudad") Long idCiudad,
                                        @Param("estado") EstadoPublicacion estado,
-                                       @Param("precioMin") Double precioMin,
-                                       @Param("precioMax") Double precioMax);
+                                       @Param("precioMin") BigDecimal precioMin,
+                                       @Param("precioMax") BigDecimal precioMax);
 }
