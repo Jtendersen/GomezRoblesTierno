@@ -2,79 +2,88 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>Facturas - HogarYA</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .btn { padding: 5px 10px; text-decoration: none; border-radius: 4px; font-size: 13px; }
-        .btn-nuevo  { background: #4CAF50; color: white; }
-        .btn-editar { background: #2196F3; color: white; }
-        .btn-danger { background: #f44336; color: white; }
-        .btn-pagar  { background: #FF9800; color: white; }
-        .btn-vencer { background: #9C27B0; color: white; }
-        .badge { padding: 3px 8px; border-radius: 3px; font-size: 12px; color: white; }
-        .PENDIENTE { background: #2196F3; }
-        .VENCIDA   { background: #9C27B0; }
-        .PAGADA    { background: #4CAF50; }
-        .ANULADA   { background: #9E9E9E; }
-    </style>
+    <title>Facturas — HogarYA</title>
+    <link rel="stylesheet" th:href="@{/css/hogarya.css}"/>
 </head>
 <body>
-    <h1>Facturas</h1>
-    <a class="btn btn-nuevo" th:href="@{/facturas/nueva}">+ Nueva Factura</a>
-    <br><br>
-    <table>
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Contrato (Propiedad)</th>
-                <th>Inquilino</th>
-                <th>Concepto</th>
-                <th>Importe</th>
-                <th>Emision</th>
-                <th>Vencimiento</th>
-                <th>Estado</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="f : ${facturas}">
-                <td th:text="${f.id}"></td>
-                <td th:text="${f.contrato.propiedad.direccion + ' - ' + f.contrato.propiedad.ciudad.nombre}"></td>
-                <td th:text="${f.contrato.inquilino.nombreCompleto}"></td>
-                <td th:text="${f.conceptoFacturado}"></td>
-                <td th:text="${'$' + f.importe}"></td>
-                <td th:text="${f.fechaEmision}"></td>
-                <td th:text="${f.fechaVencimiento}"></td>
-                <td>
-                    <span class="badge" th:classappend="${f.estado}" th:text="${f.estado}"></span>
-                </td>
-                <td>
-                    <!-- Acciones disponibles segun estado -->
-                    <a th:if="${f.estado.name() == 'PENDIENTE'}"
-                       class="btn btn-editar" th:href="@{/facturas/editar/{id}(id=${f.id})}">Editar</a>
 
-                    <a th:if="${f.estado.name() == 'PENDIENTE'}"
-                       class="btn btn-vencer" th:href="@{/facturas/vencer/{id}(id=${f.id})}"
-                       onclick="return confirm('Marcar como VENCIDA?')">Vencer</a>
+<nav class="navbar">
+    <a class="logo" th:href="@{/}"><img th:src="@{/images/logo.png}" alt="HogarYA"/></a>
+    <nav>
+        <a th:href="@{/propiedades}">Propiedades</a>
+        <a th:href="@{/publicaciones}">Publicaciones</a>
+        <a th:href="@{/contratos}">Contratos</a>
+        <a th:href="@{/facturas}" class="active">Facturas</a>
+    </nav>
+</nav>
 
-                    <a th:if="${f.estado.name() == 'PENDIENTE'}"
-                       class="btn btn-danger" th:href="@{/facturas/anular/{id}(id=${f.id})}"
-                       onclick="return confirm('Anular esta factura?')">Anular</a>
+<div class="main-content">
 
-                    <a th:if="${f.estado.name() == 'PENDIENTE' or f.estado.name() == 'VENCIDA'}"
-                       class="btn btn-pagar" th:href="@{/facturas/pagar/{id}(id=${f.id})}">Registrar Pago</a>
+    <div class="page-header">
+        <h1>Facturas</h1>
+        <a class="btn btn-primary" th:href="@{/facturas/nueva}">+ Nueva Factura</a>
+    </div>
 
-                    <a th:if="${f.estado.name() == 'PENDIENTE' or f.estado.name() == 'VENCIDA'}"
-                       class="btn btn-danger" th:href="@{/facturas/eliminar/{id}(id=${f.id})}"
-                       onclick="return confirm('Eliminar esta factura?')">Eliminar</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-    <br>
-    <a th:href="@{/}">Volver al inicio</a>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Propiedad</th>
+                    <th>Inquilino</th>
+                    <th>Concepto</th>
+                    <th>Importe</th>
+                    <th>Emisión</th>
+                    <th>Vencimiento</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="f : ${facturas}">
+                    <td th:text="${f.id}"></td>
+                    <td th:text="${f.contrato.propiedad.direccion + ' — ' + f.contrato.propiedad.ciudad.nombre}"></td>
+                    <td th:text="${f.contrato.inquilino.nombreCompleto}"></td>
+                    <td th:text="${f.conceptoFacturado}"></td>
+                    <td th:text="${'$' + #numbers.formatDecimal(f.importe, 1, 2)}"></td>
+                    <td th:text="${#temporals.format(f.fechaEmision, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${#temporals.format(f.fechaVencimiento, 'dd/MM/yyyy')}"></td>
+                    <td>
+                        <span class="badge"
+                              th:classappend="'badge-' + ${f.estado.name()}"
+                              th:text="${f.estado}"></span>
+                    </td>
+                    <td>
+                        <a th:if="${f.estado.name() == 'PENDIENTE'}"
+                           class="btn btn-primary"
+                           th:href="@{/facturas/editar/{id}(id=${f.id})}">Editar</a>
+
+                        <a th:if="${f.estado.name() == 'PENDIENTE'}"
+                           class="btn btn-vencer"
+                           th:href="@{/facturas/vencer/{id}(id=${f.id})}"
+                           onclick="return confirm('¿Marcar como VENCIDA?')">Vencer</a>
+
+                        <a th:if="${f.estado.name() == 'PENDIENTE'}"
+                           class="btn btn-neutral"
+                           th:href="@{/facturas/anular/{id}(id=${f.id})}"
+                           onclick="return confirm('¿Anular esta factura?')">Anular</a>
+
+                        <a th:if="${f.estado.name() == 'PENDIENTE' or f.estado.name() == 'VENCIDA'}"
+                           class="btn btn-pagar"
+                           th:href="@{/facturas/pagar/{id}(id=${f.id})}">Registrar Pago</a>
+
+                        <a th:if="${f.estado.name() == 'PENDIENTE' or f.estado.name() == 'VENCIDA'}"
+                           class="btn btn-danger"
+                           th:href="@{/facturas/eliminar/{id}(id=${f.id})}"
+                           onclick="return confirm('¿Eliminar esta factura?')">Eliminar</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<footer class="footer">HogarYA &mdash; Grupo GomezRoblesTierno &mdash; UTN FRSF DESI 2026</footer>
 </body>
 </html>
