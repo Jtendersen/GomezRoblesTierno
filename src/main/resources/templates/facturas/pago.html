@@ -2,60 +2,79 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8"/>
-    <title>Registrar Pago - HogarYA</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 20px; }
-        form { max-width: 500px; }
-        label { display: block; margin-top: 10px; font-weight: bold; }
-        input, select { width: 100%; padding: 6px; box-sizing: border-box; }
-        .readonly { background: #f5f5f5; color: #555; }
-        .error { color: red; margin-bottom: 10px; }
-        .btn { padding: 8px 16px; text-decoration: none; border-radius: 4px; color: white; border: none; cursor: pointer; }
-        .btn-pagar    { background: #FF9800; }
-        .btn-cancelar { background: #9E9E9E; }
-    </style>
+    <title>Registrar Pago — HogarYA</title>
+    <link rel="stylesheet" th:href="@{/css/hogarya.css}"/>
 </head>
 <body>
-    <h1>Registrar Pago — Factura #<span th:text="${factura.id}"></span></h1>
 
-    <p class="error" th:if="${error}" th:text="${error}"></p>
+<nav class="navbar">
+    <a class="logo" th:href="@{/}"><img th:src="@{/images/logo.png}" alt="HogarYA"/></a>
+    <nav>
+        <a th:href="@{/propiedades}">Propiedades</a>
+        <a th:href="@{/publicaciones}">Publicaciones</a>
+        <a th:href="@{/contratos}">Contratos</a>
+        <a th:href="@{/facturas}" class="active">Facturas</a>
+    </nav>
+</nav>
 
-    <!-- Datos de la factura (solo lectura) -->
-    <label>Contrato</label>
-    <input class="readonly" type="text" readonly
-           th:value="${factura.contrato.propiedad.direccion + ' - ' + factura.contrato.propiedad.ciudad.nombre + ' | Inquilino: ' + factura.contrato.inquilino.nombreCompleto}" />
+<div class="main-content">
+    <div class="page-header">
+        <h1>Registrar Pago — Factura #<span th:text="${factura.id}"></span></h1>
+    </div>
 
-    <label>Concepto</label>
-    <input class="readonly" type="text" readonly th:value="${factura.conceptoFacturado}" />
+    <div class="card" style="max-width:520px;">
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
 
-    <label>Importe original</label>
-    <input class="readonly" type="text" readonly th:value="${'$' + factura.importe}" />
+        <!-- Resumen de la factura (solo lectura) -->
+        <div class="form-group">
+            <label>Contrato</label>
+            <input type="text" disabled
+                   th:value="${factura.contrato.propiedad.direccion + ' — ' + factura.contrato.propiedad.ciudad.nombre + ' | ' + factura.contrato.inquilino.nombreCompleto}"/>
+        </div>
+        <div class="form-group">
+            <label>Concepto</label>
+            <input type="text" disabled th:value="${factura.conceptoFacturado}"/>
+        </div>
+        <div class="form-group">
+            <label>Importe Original</label>
+            <input type="text" disabled th:value="${'$' + #numbers.formatDecimal(factura.importe, 1, 2)}"/>
+        </div>
+        <div class="form-group">
+            <label>Estado Actual</label>
+            <input type="text" disabled th:value="${factura.estado}"/>
+        </div>
 
-    <label>Estado actual</label>
-    <input class="readonly" type="text" readonly th:value="${factura.estado}" />
+        <hr/>
 
-    <hr>
+        <!-- Datos de pago -->
+        <form th:action="@{/facturas/pagar/{id}(id=${factura.id})}" method="post">
+            <div class="form-group">
+                <label>Fecha de Pago</label>
+                <input type="date" name="fechaPago" required/>
+            </div>
+            <div class="form-group">
+                <label>Medio de Pago</label>
+                <select name="medio" required>
+                    <option value="">— Seleccione —</option>
+                    <option th:each="m : ${medios}" th:value="${m}" th:text="${m}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Importe Pagado ($)</label>
+                <input type="number" step="0.01" min="0.01" name="importePagado" required/>
+            </div>
+            <div class="form-group">
+                <label>Interés ($) — dejar en 0 si no aplica</label>
+                <input type="number" step="0.01" min="0" name="interes" value="0"/>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-pagar">Confirmar Pago</button>
+                <a class="btn btn-neutral" th:href="@{/facturas}">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
 
-    <!-- Formulario de pago -->
-    <form th:action="@{/facturas/pagar/{id}(id=${factura.id})}" method="post">
-        <label>Fecha de pago</label>
-        <input type="date" name="fechaPago" required />
-
-        <label>Medio de pago</label>
-        <select name="medio" required>
-            <option value="">-- Seleccione --</option>
-            <option th:each="m : ${medios}" th:value="${m}" th:text="${m}"></option>
-        </select>
-
-        <label>Importe pagado ($)</label>
-        <input type="number" step="0.01" min="0.01" name="importePagado" required />
-
-        <label>Interes ($) — dejar en 0 si no aplica</label>
-        <input type="number" step="0.01" min="0" name="interes" value="0" />
-
-        <br><br>
-        <button type="submit" class="btn btn-pagar">Confirmar Pago</button>
-        <a class="btn btn-cancelar" th:href="@{/facturas}">Cancelar</a>
-    </form>
+<footer class="footer">HogarYA &mdash; Grupo GomezRoblesTierno &mdash; UTN FRSF DESI 2026</footer>
 </body>
 </html>

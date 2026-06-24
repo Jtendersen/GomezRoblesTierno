@@ -1,70 +1,89 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Formulario de Contrato</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 30px; }
-        form { max-width: 520px; }
-        label { display: block; margin-top: 12px; font-weight: bold; }
-        input, select, textarea { width: 100%; padding: 6px; margin-top: 4px; box-sizing: border-box; }
-        .btn { padding: 10px 20px; margin-top: 20px; border: none; cursor: pointer; border-radius: 4px; color: white; }
-        .btn-guardar { background-color: #27ae60; }
-        .btn-cancelar { background-color: #95a5a6; text-decoration: none; display: inline-block; padding: 10px 20px; margin-top: 20px; border-radius: 4px; }
-        .error { color: #e74c3c; font-weight: bold; padding: 10px; border: 1px solid #e74c3c; margin-bottom: 15px; }
-        .info { color: #7f8c8d; font-size: 12px; margin-top: 3px; }
-    </style>
+    <meta charset="UTF-8"/>
+    <title>Contrato — HogarYA</title>
+    <link rel="stylesheet" th:href="@{/css/hogarya.css}"/>
 </head>
 <body>
 
-    <h1 th:if="${contrato.id == null}">Nuevo Contrato</h1>
-    <h1 th:if="${contrato.id != null}">Editar Contrato</h1>
+<nav class="navbar">
+    <a class="logo" th:href="@{/}"><img th:src="@{/images/logo.png}" alt="HogarYA"/></a>
+    <nav>
+        <a th:href="@{/propiedades}">Propiedades</a>
+        <a th:href="@{/publicaciones}">Publicaciones</a>
+        <a th:href="@{/contratos}" class="active">Contratos</a>
+        <a th:href="@{/facturas}">Facturas</a>
+    </nav>
+</nav>
 
-    <div class="error" th:if="${error}" th:text="${error}"></div>
+<div class="main-content">
+    <div class="page-header">
+        <h1 th:text="${contrato.id == null} ? 'Nuevo Contrato' : 'Editar Contrato #' + contrato.id"></h1>
+    </div>
 
-    <form th:action="@{/contratos/guardar}" th:object="${contrato}" method="post">
+    <div class="card" style="max-width:560px;">
+        <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
 
-        <input type="hidden" th:field="*{id}" />
+        <form th:action="@{/contratos/guardar}" th:object="${contrato}" method="post">
+            <input type="hidden" th:field="*{id}"/>
 
-        <label>Propiedad</label>
-        <select th:field="*{propiedad}" required>
-            <option value="">-- Seleccione una propiedad --</option>
-            <option th:each="p : ${propiedades}"
-                    th:value="${p.id}"
-                    th:text="${p.direccion + ' - ' + p.ciudad.nombre + ' (' + p.estadoDisponibilidad + ')'}">
-            </option>
-        </select>
-        <p class="info">El propietario se asigna automáticamente según la propiedad seleccionada.</p>
+            <div class="form-group">
+                <label>Propiedad</label>
+                <select th:field="*{propiedad}" required>
+                    <option value="">— Seleccione una propiedad —</option>
+                    <option th:each="p : ${propiedades}"
+                            th:value="${p.id}"
+                            th:text="${p.direccion + ' — ' + p.ciudad.nombre + ' (' + p.estadoDisponibilidad + ')'}">
+                    </option>
+                </select>
+                <small style="color:#6b7f96;">El propietario se asigna automáticamente.</small>
+            </div>
 
-        <label>Inquilino</label>
-        <select th:field="*{inquilino}" required>
-            <option value="">-- Seleccione un inquilino --</option>
-            <option th:each="i : ${inquilinos}"
-                    th:value="${i.id}"
-                    th:text="${i.nombreCompleto + ' — ' + i.dniCuit}">
-            </option>
-        </select>
+            <div class="form-group">
+                <label>Inquilino</label>
+                <select th:field="*{inquilino}" required>
+                    <option value="">— Seleccione un inquilino —</option>
+                    <option th:each="i : ${inquilinos}"
+                            th:value="${i.id}"
+                            th:text="${i.nombreCompleto + ' — ' + i.dniCuit}">
+                    </option>
+                </select>
+            </div>
 
-        <label>Fecha de Inicio</label>
-        <input type="date" th:field="*{fechaInicio}" required />
+            <div class="form-group">
+                <label>Fecha de Inicio</label>
+                <input type="date" th:field="*{fechaInicio}" required/>
+            </div>
 
-        <label>Duración (meses)</label>
-        <input type="number" min="1" th:field="*{duracionMeses}" required />
+            <div class="form-group">
+                <label>Duración (meses)</label>
+                <input type="number" min="1" th:field="*{duracionMeses}" required/>
+            </div>
 
-        <label>Importe Mensual ($)</label>
-        <input type="number" min="0.01" step="0.01" th:field="*{importeMensual}" required />
+            <div class="form-group">
+                <label>Importe Mensual ($)</label>
+                <input type="number" min="0.01" step="0.01" th:field="*{importeMensual}" required/>
+            </div>
 
-        <label>Día de Vencimiento Mensual (1-31)</label>
-        <input type="number" min="1" max="31" th:field="*{diaVencimientoMensual}" required />
+            <div class="form-group">
+                <label>Día de Vencimiento Mensual (1-31)</label>
+                <input type="number" min="1" max="31" th:field="*{diaVencimientoMensual}" required/>
+            </div>
 
-        <label>Descripción</label>
-        <textarea th:field="*{descripcion}" rows="3"></textarea>
+            <div class="form-group">
+                <label>Descripción</label>
+                <textarea th:field="*{descripcion}" rows="3"></textarea>
+            </div>
 
-        <br>
-        <button type="submit" class="btn btn-guardar">Guardar</button>
-        <a class="btn-cancelar" th:href="@{/contratos}">Cancelar</a>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a class="btn btn-neutral" th:href="@{/contratos}">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
 
-    </form>
-
+<footer class="footer">HogarYA &mdash; Grupo GomezRoblesTierno &mdash; UTN FRSF DESI 2026</footer>
 </body>
 </html>

@@ -1,25 +1,53 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
-  <head>
-    <meta charset="UTF-8" />
+<head>
+    <meta charset="UTF-8"/>
     <title>HogarYA</title>
-    <style>
-      body { font-family: Arial, sans-serif; margin: 40px; }
-      ul { list-style: none; padding: 0; }
-      li { margin: 10px 0; }
-      a { color: #2c3e50; font-size: 1.1em; text-decoration: none; }
-      a:hover { text-decoration: underline; }
-    </style>
-  </head>
-  <body>
-    <h1>HogarYA</h1>
-    <p>Sistema de gestión inmobiliaria - TP Integrador DESI</p>
+    <link rel="stylesheet" th:href="@{/css/hogarya.css}"/>
+</head>
+<body>
 
-    <ul>
-      <li><a th:href="@{/propiedades}">Propiedades</a></li>
-      <li><a th:href="@{/publicaciones}">Publicaciones</a></li>
-      <li><a th:href="@{/contratos}">Contratos</a></li>
-      <li><a th:href="@{/facturas}">Facturas</a></li>
-    </ul>
-  </body>
+<nav class="navbar">
+    <a class="logo" th:href="@{/}"><img th:src="@{/images/logo.png}" alt="HogarYA"/></a>
+    <nav>
+        <a th:href="@{/propiedades}">Propiedades</a>
+        <a th:href="@{/publicaciones}">Publicaciones</a>
+        <a th:href="@{/contratos}">Contratos</a>
+        <a th:href="@{/facturas}">Facturas</a>
+    </nav>
+</nav>
+
+<div class="main-content">
+    <h1 style="color:#1e3a5f; margin-bottom:6px;">Bienvenido a HogarYA</h1>
+    <p style="color:#6b7f96; margin-bottom:8px;">Sistema de gestión inmobiliaria — TP Integrador DESI 2026</p>
+
+    <div class="home-grid">
+        <a class="home-card" th:href="@{/propiedades}">
+            <div class="icon">🏠</div>
+            <h2>Propiedades</h2>
+            <p>Gestioná el catálogo de propiedades disponibles para alquiler.</p>
+        </a>
+        <a class="home-card" th:href="@{/publicaciones}" style="border-top-color:#8a9bb0; opacity:0.6; cursor:not-allowed;">
+            <div class="icon">📢</div>
+            <h2>Publicaciones</h2>
+            <p>Próximamente — publicación de propiedades disponibles.</p>
+        </a>
+        <a class="home-card" th:href="@{/contratos}" style="border-top-color:#e8543a;">
+            <div class="icon">📄</div>
+            <h2>Contratos</h2>
+            <p>Administrá contratos de alquiler y su ciclo de vida.</p>
+        </a>
+        <a class="home-card" th:href="@{/facturas}" style="border-top-color:#e8a020;">
+            <div class="icon">💰</div>
+            <h2>Facturas</h2>
+            <p>Emití y gestioná el cobro de facturas mensuales.</p>
+        </a>
+    </div>
+</div>
+
+<footer class="footer">
+    HogarYA &mdash; Grupo GomezRoblesTierno &mdash; UTN FRSF DESI 2026
+</footer>
+
+</body>
 </html>
