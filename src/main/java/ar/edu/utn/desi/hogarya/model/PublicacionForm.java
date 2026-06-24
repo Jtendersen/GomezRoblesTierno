@@ -1,7 +1,9 @@
 package ar.edu.utn.desi.hogarya.model;
 
-import ar.edu.utn.desi.hogarya.model.EstadoPublicacion;
 import jakarta.validation.constraints.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 
 public class PublicacionForm {
 
@@ -20,10 +22,14 @@ public class PublicacionForm {
     @NotBlank(message = "La descripción no puede estar vacía")
     private String descripcion;
 
+    @NotNull(message = "Debe ingresar una fecha de publicación")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    private LocalDate fechaPublicacion;
+
     @NotNull(message = "Debe definir un estado")
     private EstadoPublicacion estado;
 
-    // Getters y Setters (Generarlos en el IDE)
+    // Getters y Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Long getIdPropiedad() { return idPropiedad; }
@@ -34,6 +40,8 @@ public class PublicacionForm {
     public void setCondiciones(String condiciones) { this.condiciones = condiciones; }
     public String getDescripcion() { return descripcion; }
     public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public LocalDate getFechaPublicacion() { return fechaPublicacion; }
+    public void setFechaPublicacion(LocalDate fechaPublicacion) { this.fechaPublicacion = fechaPublicacion; }
     public EstadoPublicacion getEstado() { return estado; }
     public void setEstado(EstadoPublicacion estado) { this.estado = estado; }
 }

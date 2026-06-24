@@ -1,7 +1,6 @@
 package ar.edu.utn.desi.hogarya.service;
 
 import ar.edu.utn.desi.hogarya.exception.PublicacionException;
-import ar.edu.utn.desi.hogarya.model.PublicacionForm;
 import ar.edu.utn.desi.hogarya.model.*;
 import ar.edu.utn.desi.hogarya.repository.IHistorialEstadoPublicacionRepo;
 import ar.edu.utn.desi.hogarya.repository.IPublicacionRepo;
@@ -10,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -32,12 +30,12 @@ public class PublicacionServiceImpl implements IPublicacionService {
         Propiedad propiedad = propiedadRepo.findById(form.getIdPropiedad())
                 .orElseThrow(() -> new PublicacionException("La propiedad seleccionada no existe."));
 
-        // Regla: La propiedad debe estar disponible para publicarse
+        // Regla: la propiedad debe estar disponible y no eliminada
         if (propiedad.isEliminada() || propiedad.getEstadoDisponibilidad() != EstadoDisponibilidad.DISPONIBLE) {
             throw new PublicacionException("La propiedad debe estar DISPONIBLE para poder ser publicada.");
         }
 
-        // Regla: No duplicar publicaciones activas simultáneamente
+        // Regla: no puede haber otra publicación activa para la misma propiedad
         if (form.getEstado() == EstadoPublicacion.ACTIVA) {
             boolean existeOtraActiva = publicacionRepo.existeActivaParaPropiedad(propiedad.getId(), form.getId());
             if (existeOtraActiva) {
@@ -49,12 +47,25 @@ public class PublicacionServiceImpl implements IPublicacionService {
         EstadoPublicacion estadoAnterior = null;
 
         if (form.getId() != null) {
+            // Edición
             pub = publicacionRepo.findById(form.getId())
                     .orElseThrow(() -> new PublicacionException("Publicación no encontrada."));
+
+            // Regla: no se puede modificar una publicación finalizada (condiciones)
+            if (pub.getEstado() == EstadoPublicacion.FINALIZADA) {
+                throw new PublicacionException("No se pueden modificar las condiciones de una publicación FINALIZADA.");
+            }
+
             estadoAnterior = pub.getEstado();
+            // La propiedad no se puede cambiar en edición (HU 2.3)
+            // La fecha de publicación se mantiene la original si no se envía nueva
+            if (form.getFechaPublicacion() != null) {
+                pub.setFecha(form.getFechaPublicacion());
+            }
         } else {
+            // Alta
             pub = new Publicacion();
-            pub.setFecha(LocalDate.now());
+            pub.setFecha(form.getFechaPublicacion());
         }
 
         pub.setPropiedad(propiedad);
@@ -62,12 +73,13 @@ public class PublicacionServiceImpl implements IPublicacionService {
         pub.setCondiciones(form.getCondiciones());
         pub.setDescripcion(form.getDescripcion());
         pub.setEstado(form.getEstado());
-        
+
         publicacionRepo.save(pub);
 
-        // Generar historial solo si es nueva o si el estado cambió
+        // Registrar historial solo si es nueva o si el estado cambió
         if (form.getId() == null || estadoAnterior != form.getEstado()) {
-            HistorialEstadoPublicacion historial = new HistorialEstadoPublicacion(pub.getEstado(), LocalDateTime.now(), pub);
+            HistorialEstadoPublicacion historial = new HistorialEstadoPublicacion(
+                    pub.getEstado(), LocalDateTime.now(), pub);
             historialRepo.save(historial);
         }
     }
@@ -78,9 +90,9 @@ public class PublicacionServiceImpl implements IPublicacionService {
         Publicacion pub = publicacionRepo.findById(idPublicacion)
                 .orElseThrow(() -> new PublicacionException("Publicación no encontrada."));
 
-        // Regla de HU 2.2: Solo se pueden borrar en estado "activa"
+        // Regla HU 2.2: solo se pueden eliminar publicaciones ACTIVAS
         if (pub.getEstado() != EstadoPublicacion.ACTIVA) {
-            throw new PublicacionException("Solo se pueden eliminar publicaciones que se encuentren en estado ACTIVA.");
+            throw new PublicacionException("Solo se pueden eliminar publicaciones en estado ACTIVA.");
         }
 
         pub.setEliminada(true);
