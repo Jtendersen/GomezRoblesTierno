@@ -55,7 +55,7 @@
                               th:classappend="'badge-' + ${c.estado.name()}"
                               th:text="${c.estado}"></span>
                     </td>
-                    <td>
+                    <td class="acciones">
                         <th:block th:if="${c.estado.name() == 'BORRADOR'}">
                             <a class="btn btn-primary"
                                th:href="@{/contratos/editar/{id}(id=${c.id})}">Editar</a>

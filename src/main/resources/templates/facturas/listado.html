@@ -53,7 +53,7 @@
                               th:classappend="'badge-' + ${f.estado.name()}"
                               th:text="${f.estado}"></span>
                     </td>
-                    <td>
+                    <td class="acciones">
                         <a th:if="${f.estado.name() == 'PENDIENTE'}"
                            class="btn btn-primary"
                            th:href="@{/facturas/editar/{id}(id=${f.id})}">Editar</a>
