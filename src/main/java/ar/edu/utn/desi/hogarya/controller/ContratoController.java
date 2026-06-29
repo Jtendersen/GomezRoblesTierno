@@ -13,9 +13,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import ar.edu.utn.desi.hogarya.model.Contrato;
 import ar.edu.utn.desi.hogarya.model.EstadoContrato;
-import ar.edu.utn.desi.hogarya.repository.PersonaRepository;
-import ar.edu.utn.desi.hogarya.repository.PropiedadRepository;
 import ar.edu.utn.desi.hogarya.service.ContratoService;
+import ar.edu.utn.desi.hogarya.service.PersonaService;
+import ar.edu.utn.desi.hogarya.service.PropiedadService;
 import jakarta.validation.Valid;
 
 @Controller
@@ -26,10 +26,10 @@ public class ContratoController {
     private ContratoService contratoService;
 
     @Autowired
-    private PropiedadRepository propiedadRepository;
+    private PropiedadService propiedadService;
 
     @Autowired
-    private PersonaRepository personaRepository;
+    private PersonaService personaService;
 
     @GetMapping
     public String listar(Model model) {
@@ -90,7 +90,7 @@ public class ContratoController {
     }
 
     private void cargarDatosFormulario(Model model) {
-        model.addAttribute("propiedades", propiedadRepository.findByEliminadaFalse());
-        model.addAttribute("inquilinos", personaRepository.findAll());
+        model.addAttribute("propiedades", propiedadService.listarActivas());
+        model.addAttribute("inquilinos", personaService.listarTodas());
     }
 }

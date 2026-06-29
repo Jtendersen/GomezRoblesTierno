@@ -11,12 +11,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import ar.edu.utn.desi.hogarya.model.EstadoDisponibilidad;
 import ar.edu.utn.desi.hogarya.model.Propiedad;
 import ar.edu.utn.desi.hogarya.model.TipoPropiedad;
-import ar.edu.utn.desi.hogarya.repository.CiudadRepository;
-import ar.edu.utn.desi.hogarya.repository.PersonaRepository;
+import ar.edu.utn.desi.hogarya.service.CiudadService;
+import ar.edu.utn.desi.hogarya.service.PersonaService;
 import ar.edu.utn.desi.hogarya.service.PropiedadService;
 import jakarta.validation.Valid;
 
@@ -28,12 +29,11 @@ public class PropiedadController {
     private PropiedadService propiedadService;
 
     @Autowired
-    private CiudadRepository ciudadRepository;
+    private CiudadService ciudadService;
 
     @Autowired
-    private PersonaRepository personaRepository;
+    private PersonaService personaService;
 
-    // ---------- LISTADO (con filtros opcionales) ----------
     @GetMapping
     public String listar(
             @RequestParam(required = false) String direccion,
@@ -45,7 +45,7 @@ public class PropiedadController {
         List<Propiedad> propiedades = propiedadService.buscarConFiltros(direccion, ciudadId, tipo, estado);
 
         model.addAttribute("propiedades", propiedades);
-        model.addAttribute("ciudades", ciudadRepository.findAll());
+        model.addAttribute("ciudades", ciudadService.listarTodas());
         model.addAttribute("tipos", TipoPropiedad.values());
         model.addAttribute("estados", EstadoDisponibilidad.values());
 
@@ -57,16 +57,13 @@ public class PropiedadController {
         return "propiedades/listado";
     }
 
-    // ---------- FORMULARIO DE ALTA ----------
     @GetMapping("/nueva")
     public String formularioAlta(Model model) {
         model.addAttribute("propiedad", new Propiedad());
-        model.addAttribute("ciudades", ciudadRepository.findAll());
-        model.addAttribute("propietarios", personaRepository.findAll());
+        cargarDatosFormulario(model);
         return "propiedades/formulario";
     }
 
-    // ---------- GUARDAR (alta o modificacion) ----------
     @PostMapping("/guardar")
     public String guardar(@Valid @ModelAttribute("propiedad") Propiedad propiedad, Model model) {
         try {
@@ -78,25 +75,30 @@ public class PropiedadController {
             return "redirect:/propiedades";
         } catch (RuntimeException e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("ciudades", ciudadRepository.findAll());
-            model.addAttribute("propietarios", personaRepository.findAll());
+            cargarDatosFormulario(model);
             return "propiedades/formulario";
         }
     }
 
-    // ---------- FORMULARIO DE EDICION ----------
     @GetMapping("/editar/{id}")
     public String formularioEditar(@PathVariable Long id, Model model) {
         model.addAttribute("propiedad", propiedadService.buscarPorId(id));
-        model.addAttribute("ciudades", ciudadRepository.findAll());
-        model.addAttribute("propietarios", personaRepository.findAll());
+        cargarDatosFormulario(model);
         return "propiedades/formulario";
     }
 
-    // ---------- ELIMINAR (baja logica) ----------
     @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Long id) {
-        propiedadService.eliminar(id);
+    public String eliminar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            propiedadService.eliminar(id);
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+        }
         return "redirect:/propiedades";
+    }
+
+    private void cargarDatosFormulario(Model model) {
+        model.addAttribute("ciudades", ciudadService.listarTodas());
+        model.addAttribute("propietarios", personaService.listarTodas());
     }
 }

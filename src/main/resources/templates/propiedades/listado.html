@@ -24,6 +24,8 @@
         <a class="btn btn-primary" th:href="@{/propiedades/nueva}">+ Nueva Propiedad</a>
     </div>
 
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
     <!-- Filtros -->
     <form th:action="@{/propiedades}" method="get" class="filtros">
         <div class="form-group">

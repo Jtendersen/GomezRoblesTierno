@@ -4,8 +4,8 @@ import ar.edu.utn.desi.hogarya.exception.PublicacionException;
 import ar.edu.utn.desi.hogarya.model.EstadoPublicacion;
 import ar.edu.utn.desi.hogarya.model.Publicacion;
 import ar.edu.utn.desi.hogarya.model.PublicacionForm;
-import ar.edu.utn.desi.hogarya.repository.PropiedadRepository;
 import ar.edu.utn.desi.hogarya.service.IPublicacionService;
+import ar.edu.utn.desi.hogarya.service.PropiedadService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,7 +25,7 @@ public class PublicacionController {
     private IPublicacionService publicacionService;
 
     @Autowired
-    private PropiedadRepository propiedadRepo;
+    private PropiedadService propiedadService;
 
     // ---------- LISTADO CON FILTROS (HU 2.4) ----------
     @GetMapping
@@ -40,7 +40,7 @@ public class PublicacionController {
         List<Publicacion> lista = publicacionService.listarConFiltros(idPropiedad, idCiudad, estado, precioMin, precioMax);
         modelo.addAttribute("publicaciones", lista);
         modelo.addAttribute("listaEstados", EstadoPublicacion.values());
-        modelo.addAttribute("listaPropiedades", propiedadRepo.findByEliminadaFalse());
+        modelo.addAttribute("listaPropiedades", propiedadService.listarActivas());
         modelo.addAttribute("filtroIdPropiedad", idPropiedad);
         modelo.addAttribute("filtroIdCiudad", idCiudad);
         modelo.addAttribute("filtroEstado", estado);
@@ -116,7 +116,7 @@ public class PublicacionController {
 
     // ---------- SOPORTE ----------
     private void cargarDatosComplementarios(ModelMap modelo) {
-        modelo.addAttribute("listaPropiedades", propiedadRepo.findByEliminadaFalse());
+        modelo.addAttribute("listaPropiedades", propiedadService.listarActivas());
         modelo.addAttribute("listaEstados", EstadoPublicacion.values());
     }
 }

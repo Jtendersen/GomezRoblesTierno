@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,18 @@ public class FacturaService {
 
     public List<Factura> listarActivas() {
         return facturaRepository.findByEliminadaFalse();
+    }
+
+    public List<Factura> buscarConFiltros(Long contratoId, Long propiedadId, Long inquilinoId,
+                                          EstadoFactura estado, LocalDate fechaDesde, LocalDate fechaHasta) {
+        return facturaRepository.findByEliminadaFalse().stream()
+                .filter(f -> contratoId  == null || f.getContrato().getId().equals(contratoId))
+                .filter(f -> propiedadId == null || f.getContrato().getPropiedad().getId().equals(propiedadId))
+                .filter(f -> inquilinoId == null || f.getContrato().getInquilino().getId().equals(inquilinoId))
+                .filter(f -> estado      == null || f.getEstado() == estado)
+                .filter(f -> fechaDesde  == null || !f.getFechaVencimiento().isBefore(fechaDesde))
+                .filter(f -> fechaHasta  == null || !f.getFechaVencimiento().isAfter(fechaHasta))
+                .collect(Collectors.toList());
     }
 
     public Factura buscarPorId(Long id) {
