@@ -4,6 +4,7 @@ import ar.edu.utn.desi.hogarya.exception.PublicacionException;
 import ar.edu.utn.desi.hogarya.model.EstadoPublicacion;
 import ar.edu.utn.desi.hogarya.model.Publicacion;
 import ar.edu.utn.desi.hogarya.model.PublicacionForm;
+import ar.edu.utn.desi.hogarya.service.CiudadService;
 import ar.edu.utn.desi.hogarya.service.IPublicacionService;
 import ar.edu.utn.desi.hogarya.service.PropiedadService;
 import jakarta.validation.Valid;
@@ -27,6 +28,9 @@ public class PublicacionController {
     @Autowired
     private PropiedadService propiedadService;
 
+    @Autowired
+    private CiudadService ciudadService;
+
     // ---------- LISTADO CON FILTROS (HU 2.4) ----------
     @GetMapping
     public String listar(
@@ -41,6 +45,7 @@ public class PublicacionController {
         modelo.addAttribute("publicaciones", lista);
         modelo.addAttribute("listaEstados", EstadoPublicacion.values());
         modelo.addAttribute("listaPropiedades", propiedadService.listarActivas());
+        modelo.addAttribute("listaCiudades", ciudadService.listarTodas());
         modelo.addAttribute("filtroIdPropiedad", idPropiedad);
         modelo.addAttribute("filtroIdCiudad", idCiudad);
         modelo.addAttribute("filtroEstado", estado);

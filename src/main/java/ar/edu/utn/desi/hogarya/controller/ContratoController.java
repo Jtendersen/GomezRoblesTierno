@@ -1,6 +1,9 @@
 package ar.edu.utn.desi.hogarya.controller;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,8 +35,25 @@ public class ContratoController {
     private PersonaService personaService;
 
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("contratos", contratoService.listarActivos());
+    public String listar(
+            @RequestParam(required = false) Long propiedadId,
+            @RequestParam(required = false) Long inquilinoId,
+            @RequestParam(required = false) EstadoContrato estado,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+            Model model) {
+
+        model.addAttribute("contratos",
+                contratoService.buscarConFiltros(propiedadId, inquilinoId, estado, fechaDesde));
+
+        model.addAttribute("propiedades", propiedadService.listarActivas());
+        model.addAttribute("inquilinos",  personaService.listarTodas());
+        model.addAttribute("estados",     EstadoContrato.values());
+
+        model.addAttribute("filtroPropiedadId", propiedadId);
+        model.addAttribute("filtroInquilinoId", inquilinoId);
+        model.addAttribute("filtroEstado",      estado);
+        model.addAttribute("filtroFechaDesde",  fechaDesde);
+
         return "contratos/listado";
     }
 
