@@ -4,8 +4,13 @@ import ar.edu.utn.desi.hogarya.model.*;
 import ar.edu.utn.desi.hogarya.repository.CiudadRepository;
 import ar.edu.utn.desi.hogarya.repository.ProvinciaRepository;
 import ar.edu.utn.desi.hogarya.repository.PersonaRepository;
+import ar.edu.utn.desi.hogarya.repository.HistorialEstadoIncidenteRepository;
+import ar.edu.utn.desi.hogarya.repository.IPublicacionRepo;
+import ar.edu.utn.desi.hogarya.repository.IncidenteRepository;
+import ar.edu.utn.desi.hogarya.repository.VisitaRepository;
 import ar.edu.utn.desi.hogarya.service.ContratoService;
 import ar.edu.utn.desi.hogarya.service.FacturaService;
+import ar.edu.utn.desi.hogarya.service.IPublicacionService;
 import ar.edu.utn.desi.hogarya.service.PropiedadService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -23,19 +28,34 @@ public class DataInitializer implements CommandLineRunner {
 	private final PropiedadService propiedadService;
 	private final ContratoService contratoService;
 	private final FacturaService facturaService;
+	private final IPublicacionService publicacionService;
+	private final IPublicacionRepo publicacionRepo;
+	private final IncidenteRepository incidenteRepository;
+	private final HistorialEstadoIncidenteRepository historialIncidenteRepository;
+	private final VisitaRepository visitaRepository;
 
 	public DataInitializer(CiudadRepository ciudadRepository,
 	                       ProvinciaRepository provinciaRepository,
 	                       PersonaRepository personaRepository,
 	                       PropiedadService propiedadService,
 	                       ContratoService contratoService,
-	                       FacturaService facturaService) {
+	                       FacturaService facturaService,
+	                       IPublicacionService publicacionService,
+	                       IPublicacionRepo publicacionRepo,
+	                       IncidenteRepository incidenteRepository,
+	                       HistorialEstadoIncidenteRepository historialIncidenteRepository,
+	                       VisitaRepository visitaRepository) {
 	    this.ciudadRepository = ciudadRepository;
 	    this.provinciaRepository = provinciaRepository;
 	    this.personaRepository = personaRepository;
 	    this.propiedadService = propiedadService;
 	    this.contratoService = contratoService;
 	    this.facturaService = facturaService;
+	    this.publicacionService = publicacionService;
+	    this.publicacionRepo = publicacionRepo;
+	    this.incidenteRepository = incidenteRepository;
+	    this.historialIncidenteRepository = historialIncidenteRepository;
+	    this.visitaRepository = visitaRepository;
 	}
 
     @Override
@@ -192,5 +212,92 @@ public class DataInitializer implements CommandLineRunner {
                 new BigDecimal("120000.00"),
                 BigDecimal.ZERO
         );
+
+        // --- Publicaciones ---
+
+        // Publicacion 1: ACTIVA — p4 (Urquiza 321, Santa Fe)
+        PublicacionForm pub1 = new PublicacionForm();
+        pub1.setIdPropiedad(p4.getId());
+        pub1.setPrecioMensual(new BigDecimal("75000.00"));
+        pub1.setCondiciones("Depósito: 2 meses. Garantía propietaria. No mascotas.");
+        pub1.setDescripcion("Departamento en planta baja con patio exclusivo. Excelente estado.");
+        pub1.setFechaPublicacion(LocalDate.of(2026, 6, 1));
+        pub1.setEstado(EstadoPublicacion.ACTIVA);
+        publicacionService.guardarPublicacion(pub1);
+
+        // Publicacion 2: PAUSADA — p1 (Rivadavia 1234, Santa Fe)
+        PublicacionForm pub2 = new PublicacionForm();
+        pub2.setIdPropiedad(p1.getId());
+        pub2.setPrecioMensual(new BigDecimal("85000.00"));
+        pub2.setCondiciones("Depósito: 1 mes. Garantía bancaria o propietaria. Acepta mascotas pequeñas.");
+        pub2.setDescripcion("Departamento luminoso en piso 3 con cochera incluida.");
+        pub2.setFechaPublicacion(LocalDate.of(2026, 5, 15));
+        pub2.setEstado(EstadoPublicacion.PAUSADA);
+        publicacionService.guardarPublicacion(pub2);
+
+        // Publicacion 3: FINALIZADA — p3 (Av. Vélez Sársfield, Córdoba)
+        PublicacionForm pub3 = new PublicacionForm();
+        pub3.setIdPropiedad(p3.getId());
+        pub3.setPrecioMensual(new BigDecimal("95000.00"));
+        pub3.setCondiciones("Depósito: 2 meses. Solo garantía propietaria. Local para rubro comercial.");
+        pub3.setDescripcion("Local comercial en zona céntrica, frente al mercado. Habilitado.");
+        pub3.setFechaPublicacion(LocalDate.of(2026, 1, 1));
+        pub3.setEstado(EstadoPublicacion.FINALIZADA);
+        publicacionService.guardarPublicacion(pub3);
+
+        // --- Incidentes (sobre el contrato ACTIVO c2) ---
+
+        Incidente i1 = new Incidente();
+        i1.setContrato(c2Activo);
+        i1.setTitulo("Pérdida de agua en baño");
+        i1.setDescripcion("Se detectó pérdida en la canilla del baño principal.");
+        i1.setCategoria(CategoriaIncidente.PLOMERIA);
+        i1.setPrioridad(PrioridadIncidente.MEDIA);
+        i1.setEstado(EstadoIncidente.RESUELTO);
+        i1.setFechaAlta(LocalDate.of(2026, 5, 10).atStartOfDay());
+        i1.setFechaResolucion(LocalDate.of(2026, 5, 12).atStartOfDay());
+        i1.setObservacionesResolucion("Se reemplazó la canilla sin inconvenientes.");
+        i1.setCostoResolucion(new BigDecimal("8500.00"));
+        i1.setResponsableTecnico("Plomería Rodríguez");
+        Incidente i1Guardado = incidenteRepository.save(i1);
+        historialIncidenteRepository.save(
+                new HistorialEstadoIncidente(EstadoIncidente.ABIERTO, LocalDate.of(2026, 5, 10).atStartOfDay(), i1Guardado));
+        historialIncidenteRepository.save(
+                new HistorialEstadoIncidente(EstadoIncidente.RESUELTO, LocalDate.of(2026, 5, 12).atStartOfDay(), i1Guardado));
+
+        Incidente i2 = new Incidente();
+        i2.setContrato(c2Activo);
+        i2.setTitulo("Cortocircuito en cocina");
+        i2.setDescripcion("El tablero de la cocina disyunta con frecuencia al usar el microondas.");
+        i2.setCategoria(CategoriaIncidente.ELECTRICIDAD);
+        i2.setPrioridad(PrioridadIncidente.ALTA);
+        i2.setEstado(EstadoIncidente.EN_PROCESO);
+        i2.setFechaAlta(LocalDate.of(2026, 6, 20).atStartOfDay());
+        Incidente i2Guardado = incidenteRepository.save(i2);
+        historialIncidenteRepository.save(
+                new HistorialEstadoIncidente(EstadoIncidente.ABIERTO, LocalDate.of(2026, 6, 20).atStartOfDay(), i2Guardado));
+        historialIncidenteRepository.save(
+                new HistorialEstadoIncidente(EstadoIncidente.EN_PROCESO, LocalDate.of(2026, 6, 22).atStartOfDay(), i2Guardado));
+
+        // --- Visitas (sobre la publicacion ACTIVA de p4) ---
+
+        Publicacion pubActiva = publicacionRepo.findAll().stream()
+                .filter(p -> p.getEstado() == EstadoPublicacion.ACTIVA && !p.isEliminada())
+                .findFirst()
+                .orElse(null);
+
+        if (pubActiva != null) {
+            Visita v1 = new Visita();
+            v1.setPublicacion(pubActiva);
+            v1.setFechaHora(LocalDate.of(2026, 6, 15).atTime(10, 0));
+            v1.setEstado(EstadoVisita.REALIZADA);
+            visitaRepository.save(v1);
+
+            Visita v2 = new Visita();
+            v2.setPublicacion(pubActiva);
+            v2.setFechaHora(LocalDate.of(2026, 7, 5).atTime(11, 30));
+            v2.setEstado(EstadoVisita.PENDIENTE);
+            visitaRepository.save(v2);
+        }
     }
 }

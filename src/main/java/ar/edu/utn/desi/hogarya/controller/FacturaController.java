@@ -96,9 +96,17 @@ public class FacturaController {
 
     // ---------- FORMULARIO DE EDICION ----------
     @GetMapping("/editar/{id}")
-    public String formularioEditar(@PathVariable Long id, Model model) {
+    public String formularioEditar(@PathVariable Long id, Model model,
+                                   RedirectAttributes redirectAttributes) {
         try {
-            model.addAttribute("factura", facturaService.buscarPorId(id));
+            Factura factura = facturaService.buscarPorId(id);
+            if (factura.getEstado() == EstadoFactura.PAGADA ||
+                    factura.getEstado() == EstadoFactura.ANULADA) {
+                redirectAttributes.addFlashAttribute("error",
+                        "No se puede modificar una factura en estado " + factura.getEstado() + ".");
+                return "redirect:/facturas";
+            }
+            model.addAttribute("factura", factura);
             model.addAttribute("contratos", contratoService.listarVigentes());
             return "facturas/formulario";
         } catch (Exception e) {

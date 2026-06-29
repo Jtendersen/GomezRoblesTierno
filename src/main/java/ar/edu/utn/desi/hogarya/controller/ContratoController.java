@@ -65,8 +65,15 @@ public class ContratoController {
     }
 
     @GetMapping("/editar/{id}")
-    public String formularioEditar(@PathVariable Long id, Model model) {
-        model.addAttribute("contrato", contratoService.buscarPorId(id));
+    public String formularioEditar(@PathVariable Long id, Model model,
+                                   RedirectAttributes redirectAttributes) {
+        Contrato contrato = contratoService.buscarPorId(id);
+        if (contrato.getEstado() != EstadoContrato.BORRADOR) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Solo se pueden editar contratos en estado BORRADOR.");
+            return "redirect:/contratos";
+        }
+        model.addAttribute("contrato", contrato);
         cargarDatosFormulario(model);
         return "contratos/formulario";
     }
