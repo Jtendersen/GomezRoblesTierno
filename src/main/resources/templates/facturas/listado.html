@@ -24,11 +24,70 @@
         <a class="btn btn-primary" th:href="@{/facturas/nueva}">+ Nueva Factura</a>
     </div>
 
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <!-- Filtros (HU 4.4) -->
+    <form th:action="@{/facturas}" method="get" class="filtros">
+        <div class="form-group">
+            <label>Contrato</label>
+            <select name="contratoId">
+                <option value="">— Todos —</option>
+                <option th:each="c : ${contratos}"
+                        th:value="${c.id}"
+                        th:text="${'#' + c.id + ' — ' + c.propiedad.direccion + ' | ' + c.inquilino.nombreCompleto}"
+                        th:selected="${c.id == filtroContratoId}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Propiedad</label>
+            <select name="propiedadId">
+                <option value="">— Todas —</option>
+                <option th:each="p : ${propiedades}"
+                        th:value="${p.id}"
+                        th:text="${p.direccion + ' — ' + p.ciudad.nombre}"
+                        th:selected="${p.id == filtroPropiedadId}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Inquilino</label>
+            <select name="inquilinoId">
+                <option value="">— Todos —</option>
+                <option th:each="i : ${inquilinos}"
+                        th:value="${i.id}"
+                        th:text="${i.nombreCompleto}"
+                        th:selected="${i.id == filtroInquilinoId}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Estado</label>
+            <select name="estado">
+                <option value="">— Todos —</option>
+                <option th:each="e : ${estados}"
+                        th:value="${e}"
+                        th:text="${e}"
+                        th:selected="${e == filtroEstado}"></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Vence desde</label>
+            <input type="date" name="fechaDesde" th:value="${filtroFechaDesde}"/>
+        </div>
+        <div class="form-group">
+            <label>Vence hasta</label>
+            <input type="date" name="fechaHasta" th:value="${filtroFechaHasta}"/>
+        </div>
+        <div style="display:flex; gap:8px; align-items:flex-end;">
+            <button type="submit" class="btn btn-secondary">Buscar</button>
+            <a th:href="@{/facturas}" class="btn btn-neutral">Limpiar</a>
+        </div>
+    </form>
+
     <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
                     <th>#</th>
+                    <th>Contrato</th>
                     <th>Propiedad</th>
                     <th>Inquilino</th>
                     <th>Concepto</th>
@@ -40,8 +99,12 @@
                 </tr>
             </thead>
             <tbody>
+                <tr th:if="${#lists.isEmpty(facturas)}">
+                    <td colspan="10" style="text-align:center; color:#6b7f96;">No hay facturas registradas.</td>
+                </tr>
                 <tr th:each="f : ${facturas}">
                     <td th:text="${f.id}"></td>
+                    <td th:text="${'#' + f.contrato.id}"></td>
                     <td th:text="${f.contrato.propiedad.direccion + ' — ' + f.contrato.propiedad.ciudad.nombre}"></td>
                     <td th:text="${f.contrato.inquilino.nombreCompleto}"></td>
                     <td th:text="${f.conceptoFacturado}"></td>

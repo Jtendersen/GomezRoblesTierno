@@ -7,9 +7,9 @@ TP Integrador — DESI 2026 — UTN FRSF.
 
 ## Integrantes
 
-- Gomez
-- Robles
-- Juan Manuel Tierno
+- Gomez Juan
+- Robles Maria Eugenia
+- Tierno Juan Manuel
 
 ---
 
@@ -90,6 +90,7 @@ git push origin nombre-de-tu-rama
 ### Nombrar las ramas
 
 Algo descriptivo y sin espacios, por ejemplo:
+
 - `feature/abmc-publicaciones`
 - `fix/validacion-contrato`
 - `feature/listado-facturas`

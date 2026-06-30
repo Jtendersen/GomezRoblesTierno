@@ -1,6 +1,9 @@
 package ar.edu.utn.desi.hogarya.controller;
 
+import java.time.LocalDate;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,9 +16,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import ar.edu.utn.desi.hogarya.model.Contrato;
 import ar.edu.utn.desi.hogarya.model.EstadoContrato;
-import ar.edu.utn.desi.hogarya.repository.PersonaRepository;
-import ar.edu.utn.desi.hogarya.repository.PropiedadRepository;
 import ar.edu.utn.desi.hogarya.service.ContratoService;
+import ar.edu.utn.desi.hogarya.service.PersonaService;
+import ar.edu.utn.desi.hogarya.service.PropiedadService;
 import jakarta.validation.Valid;
 
 @Controller
@@ -26,14 +29,31 @@ public class ContratoController {
     private ContratoService contratoService;
 
     @Autowired
-    private PropiedadRepository propiedadRepository;
+    private PropiedadService propiedadService;
 
     @Autowired
-    private PersonaRepository personaRepository;
+    private PersonaService personaService;
 
     @GetMapping
-    public String listar(Model model) {
-        model.addAttribute("contratos", contratoService.listarActivos());
+    public String listar(
+            @RequestParam(required = false) Long propiedadId,
+            @RequestParam(required = false) Long inquilinoId,
+            @RequestParam(required = false) EstadoContrato estado,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaDesde,
+            Model model) {
+
+        model.addAttribute("contratos",
+                contratoService.buscarConFiltros(propiedadId, inquilinoId, estado, fechaDesde));
+
+        model.addAttribute("propiedades", propiedadService.listarActivas());
+        model.addAttribute("inquilinos",  personaService.listarTodas());
+        model.addAttribute("estados",     EstadoContrato.values());
+
+        model.addAttribute("filtroPropiedadId", propiedadId);
+        model.addAttribute("filtroInquilinoId", inquilinoId);
+        model.addAttribute("filtroEstado",      estado);
+        model.addAttribute("filtroFechaDesde",  fechaDesde);
+
         return "contratos/listado";
     }
 
@@ -45,8 +65,15 @@ public class ContratoController {
     }
 
     @GetMapping("/editar/{id}")
-    public String formularioEditar(@PathVariable Long id, Model model) {
-        model.addAttribute("contrato", contratoService.buscarPorId(id));
+    public String formularioEditar(@PathVariable Long id, Model model,
+                                   RedirectAttributes redirectAttributes) {
+        Contrato contrato = contratoService.buscarPorId(id);
+        if (contrato.getEstado() != EstadoContrato.BORRADOR) {
+            redirectAttributes.addFlashAttribute("error",
+                    "Solo se pueden editar contratos en estado BORRADOR.");
+            return "redirect:/contratos";
+        }
+        model.addAttribute("contrato", contrato);
         cargarDatosFormulario(model);
         return "contratos/formulario";
     }
@@ -90,7 +117,7 @@ public class ContratoController {
     }
 
     private void cargarDatosFormulario(Model model) {
-        model.addAttribute("propiedades", propiedadRepository.findByEliminadaFalse());
-        model.addAttribute("inquilinos", personaRepository.findAll());
+        model.addAttribute("propiedades", propiedadService.listarActivas());
+        model.addAttribute("inquilinos", personaService.listarTodas());
     }
 }

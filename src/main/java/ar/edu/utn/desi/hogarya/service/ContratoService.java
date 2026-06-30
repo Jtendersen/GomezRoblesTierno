@@ -1,7 +1,9 @@
 package ar.edu.utn.desi.hogarya.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,22 @@ public class ContratoService {
 
     public List<Contrato> listarActivos() {
         return contratoRepository.findByEliminadoFalse();
+    }
+
+    public List<Contrato> listarVigentes() {
+        return contratoRepository.findByEliminadoFalse().stream()
+                .filter(c -> c.getEstado() == EstadoContrato.ACTIVO)
+                .collect(Collectors.toList());
+    }
+
+    public List<Contrato> buscarConFiltros(Long propiedadId, Long inquilinoId,
+                                           EstadoContrato estado, LocalDate fechaDesde) {
+        return contratoRepository.findByEliminadoFalse().stream()
+                .filter(c -> propiedadId == null || c.getPropiedad().getId().equals(propiedadId))
+                .filter(c -> inquilinoId == null || c.getInquilino().getId().equals(inquilinoId))
+                .filter(c -> estado      == null || c.getEstado() == estado)
+                .filter(c -> fechaDesde  == null || !c.getFechaInicio().isBefore(fechaDesde))
+                .collect(Collectors.toList());
     }
 
     public Contrato buscarPorId(Long id) {
